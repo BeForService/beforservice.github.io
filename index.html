@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BeForService | Digital Solutions</title>
+    <title>BeForService | Professional Toolkits</title>
     <style>
         :root {
-            --primary: #2c3e50;
-            --accent: #3498db;
-            --bg: #f4f7f6;
-            --text: #333;
+            --primary-dark: #1a252f; /* Deep Navy/Slate */
+            --accent-blue: #2980b9;  /* Professional Blue */
+            --bg-light: #ffffff;
+            --card-hover: #f8f9fa;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f0f2f5;
+            color: var(--primary-dark);
             margin: 0;
             display: flex;
             justify-content: center;
@@ -22,55 +22,88 @@
             min-height: 100vh;
         }
         .container {
-            background: white;
-            padding: 3rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-width: 600px;
+            background: var(--bg-light);
+            padding: 4rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            max-width: 500px;
             width: 90%;
             text-align: center;
         }
-        h1 { color: var(--primary); margin-bottom: 0.5rem; }
-        p { color: #666; margin-bottom: 2rem; }
+        /* Logo Styling */
+        .logo-placeholder {
+            max-width: 180px;
+            height: auto;
+            margin-bottom: 2rem;
+        }
+        h1 { 
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem; 
+        }
+        .subtitle { 
+            color: #6c757d; 
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
         .links-container {
             display: grid;
-            gap: 1rem;
+            gap: 1.25rem;
         }
         .app-card {
-            display: block;
+            display: flex;
+            flex-direction: column;
             text-decoration: none;
             background: white;
-            border: 2px solid #eee;
+            border: 1px solid #e1e4e8;
             padding: 1.5rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            color: var(--primary);
+            border-radius: 12px;
+            transition: all 0.2s ease-in-out;
+            text-align: left;
         }
         .app-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+            border-color: var(--accent-blue);
+            background-color: var(--card-hover);
+            transform: translateY(-2px);
         }
-        .app-card h3 { margin: 0 0 0.5rem 0; color: var(--accent); }
-        .app-card p { margin: 0; font-size: 0.9rem; color: #777; }
-        footer { margin-top: 2rem; font-size: 0.8rem; color: #999; }
+        .app-card h3 { 
+            margin: 0 0 0.4rem 0; 
+            color: var(--accent-blue);
+            font-size: 1.2rem;
+        }
+        .app-card p { 
+            margin: 0; 
+            font-size: 0.95rem; 
+            color: #495057;
+            line-height: 1.4;
+        }
+        footer { 
+            margin-top: 3rem; 
+            font-size: 0.85rem; 
+            color: #adb5bd;
+            border-top: 1px solid #eee;
+            padding-top: 1.5rem;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <img src="logo.png" alt="BeForService Logo" class="logo-placeholder">
+    
     <h1>BeForService</h1>
-    <p>Training & Supply Chain Digital Toolkits</p>
+    <p class="subtitle">Supply Chain & Training Digital Solutions</p>
 
     <div class="links-container">
         <a href="https://beforservice.github.io/ctsc-bootcamp/" class="app-card">
             <h3>CTSC Bootcamp</h3>
-            <p>Access training materials and curriculum resources.</p>
+            <p>Access curriculum resources and training roadmap.</p>
         </a>
 
         <a href="https://beforservice.github.io/ctsc-flashcards/" class="app-card">
             <h3>CTSC Flashcards</h3>
-            <p>Interactive study tools for certification preparation.</p>
+            <p>Interactive study tools for professional certification.</p>
         </a>
     </div>
 
