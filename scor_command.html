@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCOR Command — Supply Chain KPI Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=Barlow:wght@300;400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   TOKENS
+══════════════════════════════════════════ */
+:root{
+  --bg:#0b0d11;
+  --panel:#111418;
+  --card:#171b22;
+  --border:#1e2530;
+  --border2:#252d3a;
+  --amber:#f5a623;
+  --amber2:#ffd07a;
+  --teal:#00c9a7;
+  --red:#ff4757;
+  --green:#2ed573;
+  --blue:#1e90ff;
+  --purple:#a29bfe;
+  --text:#dce4f0;
+  --muted:#5a6a82;
+  --dim:#2a3545;
+
+  /* Team colors */
+  --t1:#f5a623; --t1d:rgba(245,166,35,.12);
+  --t2:#00c9a7; --t2d:rgba(0,201,167,.12);
+  --t3:#a29bfe; --t3d:rgba(162,155,254,.12);
+  --t4:#ff6b81; --t4d:rgba(255,107,129,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
+
+/* ══ TYPOGRAPHY ══ */
+.mono{font-family:'Share Tech Mono',monospace;}
+.condensed{font-family:'Barlow Condensed',sans-serif;}
+.label{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+
+/* ══ SCANLINE OVERLAY ══ */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);
+}
+
+/* ══ SCREENS ══ */
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* ══════════════════════════════════════════
+   SETUP SCREEN
+══════════════════════════════════════════ */
+#screen-setup{
+  align-items:center;justify-content:center;
+  padding:2rem 1rem;
+  background:radial-gradient(ellipse 70% 60% at 50% 40%,rgba(245,166,35,.06) 0%,transparent 70%);
+}
+.setup-logo{
+  text-align:center;margin-bottom:3rem;
+}
+.setup-logo .eyebrow{
+  font-family:'Share Tech Mono',monospace;font-size:.65rem;
+  letter-spacing:.4em;color:var(--amber);text-transform:uppercase;margin-bottom:.6rem;
+}
+.setup-logo h1{
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;
+  font-size:clamp(3rem,8vw,5.5rem);letter-spacing:-.01em;line-height:.95;
+}
+.setup-logo h1 span{color:var(--amber);}
+.setup-logo p{color:var(--muted);font-size:.9rem;margin-top:.8rem;max-width:420px;margin-left:auto;margin-right:auto;}
+
+.setup-card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:16px;padding:2rem;width:100%;max-width:680px;
+}
+.setup-section{margin-bottom:2rem;}
+.setup-section:last-child{margin-bottom:0;}
+.setup-section h3{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--amber);
+  margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:.5rem;
+}
+
+/* KPI picker */
+.kpi-category{margin-bottom:1rem;}
+.kpi-cat-label{
+  font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;padding:.2rem .6rem;
+  border-left:2px solid var(--amber);display:block;
+}
+.kpi-chips{display:flex;flex-wrap:wrap;gap:.4rem;}
+.kpi-chip{
+  font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:.05em;
+  padding:.35rem .75rem;border-radius:6px;border:1px solid var(--border2);
+  color:var(--muted);background:var(--card);cursor:pointer;transition:all .18s;
+  white-space:nowrap;
+}
+.kpi-chip:hover{border-color:var(--amber);color:var(--amber2);}
+.kpi-chip.selected{border-color:var(--amber);color:var(--bg);background:var(--amber);font-weight:600;}
+.kpi-chip.disabled-chip{opacity:.35;cursor:default;}
+
+/* Team setup */
+.team-count-row{display:flex;gap:.5rem;margin-bottom:1.25rem;}
+.tc-btn{
+  flex:1;padding:.6rem;border-radius:8px;border:1px solid var(--border2);
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;
+  color:var(--muted);background:var(--card);cursor:pointer;transition:all .18s;
+}
+.tc-btn.active{border-color:var(--amber);color:var(--amber);background:rgba(245,166,35,.08);}
+.team-inputs{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+.team-input-wrap{display:none;}
+.team-input-wrap.show{display:block;}
+.team-label{
+  font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.15em;
+  text-transform:uppercase;margin-bottom:.3rem;display:flex;align-items:center;gap:.5rem;
+}
+.team-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.team-name-input{
+  width:100%;background:var(--bg);border:1px solid var(--border2);
+  border-radius:8px;padding:.6rem .9rem;color:var(--text);
+  font-family:'Barlow',sans-serif;font-size:.9rem;outline:none;
+  transition:border-color .18s;
+}
+.team-name-input:focus{border-color:var(--amber);}
+
+/* Rounds */
+.rounds-row{display:flex;gap:.5rem;}
+.round-btn{
+  flex:1;padding:.55rem;border-radius:8px;border:1px solid var(--border2);
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;
+  color:var(--muted);background:var(--card);cursor:pointer;transition:all .18s;
+}
+.round-btn.active{border-color:var(--teal);color:var(--teal);background:rgba(0,201,167,.08);}
+
+.start-btn{
+  width:100%;margin-top:1.5rem;padding:1rem;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.4rem;
+  letter-spacing:.08em;text-transform:uppercase;
+  background:var(--amber);color:var(--bg);border:none;border-radius:10px;
+  cursor:pointer;transition:all .2s;
+}
+.start-btn:hover{background:var(--amber2);transform:translateY(-2px);box-shadow:0 8px 30px rgba(245,166,35,.3);}
+
+/* ══════════════════════════════════════════
+   GAME SCREEN
+══════════════════════════════════════════ */
+#screen-game{flex-direction:row;height:100vh;overflow:hidden;}
+
+/* Sidebar */
+.sidebar{
+  width:280px;flex-shrink:0;
+  background:var(--panel);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+.sidebar-top{
+  padding:1.25rem 1.25rem .75rem;
+  border-bottom:1px solid var(--border);
+}
+.game-logo{
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem;
+  letter-spacing:.05em;color:var(--amber);
+}
+.game-meta{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;color:var(--muted);margin-top:.2rem;}
+
+/* Round tracker */
+.round-tracker{padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
+.rt-label{font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
+.rt-dots{display:flex;gap:.35rem;flex-wrap:wrap;}
+.rt-dot{
+  width:22px;height:22px;border-radius:5px;border:1px solid var(--border2);
+  font-family:'Share Tech Mono',monospace;font-size:.55rem;
+  display:flex;align-items:center;justify-content:center;color:var(--muted);
+  transition:all .2s;
+}
+.rt-dot.done{background:rgba(245,166,35,.15);border-color:var(--amber);color:var(--amber);}
+.rt-dot.current{background:var(--amber);color:var(--bg);font-weight:700;box-shadow:0 0 10px rgba(245,166,35,.4);}
+
+/* Scoreboard */
+.scoreboard{flex:1;padding:1rem 1.25rem;overflow-y:auto;}
+.sb-title{font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;}
+.team-score-card{
+  margin-bottom:.75rem;border-radius:10px;padding:.9rem;
+  border:1px solid var(--border);background:var(--card);
+  transition:all .2s;
+}
+.team-score-card.current-turn{box-shadow:0 0 0 2px var(--amber);}
+.tsm-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;}
+.tsm-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.03em;}
+.tsm-rank{font-family:'Share Tech Mono',monospace;font-size:.6rem;padding:.15rem .45rem;border-radius:4px;}
+.tsm-score{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.8rem;letter-spacing:-.02em;}
+.tsm-kpi-bars{display:flex;flex-direction:column;gap:.3rem;margin-top:.5rem;}
+.tsm-bar-row{display:flex;align-items:center;gap:.4rem;}
+.tsm-bar-label{font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--muted);width:55px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tsm-bar-track{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.tsm-bar-fill{height:100%;border-radius:2px;transition:width .6s ease;}
+.tsm-bar-val{font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--muted);width:30px;text-align:right;flex-shrink:0;}
+
+/* Focus KPI badge */
+.focus-badge{
+  margin:0 1.25rem 1rem;padding:.65rem 1rem;
+  background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);
+  border-radius:10px;
+}
+.fb-label{font-family:'Share Tech Mono',monospace;font-size:.52rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem;}
+.fb-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;color:var(--amber);line-height:1.2;}
+
+/* ── MAIN AREA ── */
+.main-area{
+  flex:1;display:flex;flex-direction:column;overflow:hidden;
+}
+
+/* Header bar */
+.game-header{
+  padding:.85rem 1.5rem;background:var(--panel);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.gh-turn{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;letter-spacing:.03em;
+}
+.gh-turn span{font-size:1.4rem;}
+.gh-phase{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
+.gh-actions{display:flex;gap:.5rem;align-items:center;}
+
+/* Content area */
+.content-area{flex:1;overflow-y:auto;padding:1.5rem;}
+
+/* ── SCENARIO CARD ── */
+.scenario-card{
+  background:var(--card);border:1px solid var(--border2);border-radius:14px;
+  margin-bottom:1.25rem;overflow:hidden;
+}
+.sc-header{
+  padding:1rem 1.5rem;display:flex;align-items:center;gap:1rem;
+  background:linear-gradient(135deg,rgba(245,166,35,.08),transparent);
+  border-bottom:1px solid var(--border);
+}
+.sc-cat{
+  font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.2em;
+  text-transform:uppercase;padding:.25rem .65rem;border-radius:4px;
+  background:rgba(245,166,35,.12);color:var(--amber);flex-shrink:0;
+}
+.sc-round{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);}
+.sc-title{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.5rem;
+  letter-spacing:.02em;
+}
+.sc-body{
+  padding:1rem 1.5rem;color:#a0b0c8;font-size:.88rem;line-height:1.65;
+}
+.sc-impact-preview{
+  padding:.75rem 1.5rem;border-top:1px solid var(--border);
+  display:flex;flex-wrap:wrap;gap:.5rem;
+}
+.sip-chip{
+  font-family:'Share Tech Mono',monospace;font-size:.55rem;
+  padding:.2rem .55rem;border-radius:4px;
+}
+.sip-chip.affected{background:rgba(245,166,35,.1);color:var(--amber2);}
+.sip-chip.focus{background:rgba(245,166,35,.25);color:var(--amber);border:1px solid rgba(245,166,35,.4);}
+
+/* ── DECISION CARDS ── */
+.decisions-title{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:.85rem;
+}
+.decisions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.9rem;}
+.decision-card{
+  background:var(--card);border:1px solid var(--border2);border-radius:12px;
+  padding:1.25rem;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;
+}
+.decision-card::before{
+  content:'';position:absolute;inset:0;opacity:0;
+  background:linear-gradient(135deg,rgba(245,166,35,.06),transparent);
+  transition:opacity .22s;
+}
+.decision-card:hover{border-color:rgba(245,166,35,.4);transform:translateY(-2px);}
+.decision-card:hover::before{opacity:1;}
+.decision-card.selected{border-color:var(--amber);background:rgba(245,166,35,.06);}
+.dc-letter{
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:2.5rem;
+  line-height:1;color:var(--border2);position:absolute;top:.5rem;right:.9rem;
+  transition:color .2s;
+}
+.decision-card:hover .dc-letter,.decision-card.selected .dc-letter{color:rgba(245,166,35,.2);}
+.dc-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:.5rem;letter-spacing:.02em;}
+.dc-desc{font-size:.8rem;color:#8898ab;line-height:1.6;margin-bottom:.9rem;}
+.dc-impacts{display:flex;flex-wrap:wrap;gap:.35rem;}
+.dc-impact{
+  font-family:'Share Tech Mono',monospace;font-size:.55rem;
+  padding:.18rem .5rem;border-radius:4px;
+}
+.dc-impact.pos{background:rgba(46,213,115,.1);color:var(--green);}
+.dc-impact.neg{background:rgba(255,71,87,.1);color:var(--red);}
+.dc-impact.neu{background:rgba(90,106,130,.1);color:var(--muted);}
+.decision-card.selected .dc-title{color:var(--amber);}
+
+/* ── CONFIRM BUTTON ── */
+.confirm-bar{
+  flex-shrink:0;padding:1rem 1.5rem;background:var(--panel);border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+}
+.cb-hint{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.08em;}
+.confirm-btn{
+  padding:.75rem 2rem;border:none;border-radius:9px;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.2rem;
+  letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
+  background:var(--dim);color:var(--muted);transition:all .2s;
+}
+.confirm-btn.ready{background:var(--amber);color:var(--bg);box-shadow:0 4px 20px rgba(245,166,35,.3);}
+.confirm-btn.ready:hover{background:var(--amber2);transform:translateY(-1px);}
+
+/* ══════════════════════════════════════════
+   RESULTS SCREEN
+══════════════════════════════════════════ */
+#screen-results{align-items:center;justify-content:center;padding:2rem 1rem;min-height:100vh;}
+.results-wrap{width:100%;max-width:900px;}
+.results-header{text-align:center;margin-bottom:2.5rem;}
+.results-header .eyebrow{font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--amber);margin-bottom:.5rem;}
+.results-header h2{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:3rem;}
+
+.podium{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;}
+.podium-card{
+  background:var(--panel);border:1px solid var(--border);border-radius:14px;
+  padding:1.5rem;text-align:center;position:relative;overflow:hidden;
+}
+.podium-card.rank-1{border-color:var(--amber);background:linear-gradient(135deg,rgba(245,166,35,.12),var(--panel));}
+.podium-card.rank-2{border-color:rgba(255,255,255,.15);}
+.podium-card.rank-3{border-color:rgba(255,255,255,.08);}
+.podium-rank{
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:3.5rem;
+  line-height:1;opacity:.12;position:absolute;top:.5rem;right:.75rem;
+}
+.podium-medal{font-size:2rem;margin-bottom:.5rem;}
+.podium-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.2rem;margin-bottom:.3rem;}
+.podium-score{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:2.5rem;}
+.podium-score-label{font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;}
+
+.kpi-final-table{
+  background:var(--panel);border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;margin-bottom:1.5rem;
+}
+.kft-head{
+  display:grid;padding:.75rem 1.25rem;background:var(--card);
+  border-bottom:1px solid var(--border);
+  font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+}
+.kft-row{
+  display:grid;padding:.65rem 1.25rem;border-bottom:1px solid var(--border);
+  font-size:.85rem;align-items:center;transition:background .15s;
+}
+.kft-row:hover{background:rgba(255,255,255,.02);}
+.kft-row:last-child{border-bottom:none;}
+.kft-kpi{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--amber2);}
+.kft-val-good{color:var(--green);}
+.kft-val-bad{color:var(--red);}
+.kft-val-neu{color:var(--text);}
+
+.result-actions{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;}
+
+/* ══════════════════════════════════════════
+   EDITOR SCREEN
+══════════════════════════════════════════ */
+#screen-editor{padding:2rem 1rem;}
+.editor-wrap{max-width:900px;margin:0 auto;}
+.ed-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;}
+.ed-header h2{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:2rem;}
+.ed-tabs{display:flex;gap:.4rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:.75rem;}
+.ed-tab{
+  font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:.4rem .85rem;border-radius:7px;border:1px solid transparent;color:var(--muted);
+  background:none;cursor:pointer;transition:all .18s;
+}
+.ed-tab.active{border-color:var(--amber);color:var(--amber);background:rgba(245,166,35,.08);}
+.ed-panel{display:none;}
+.ed-panel.active{display:block;}
+
+/* Scenario list */
+.scenario-list{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.25rem;}
+.sl-item{
+  background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  padding:.9rem 1.1rem;display:flex;align-items:flex-start;gap:.9rem;
+}
+.sl-num{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);width:28px;flex-shrink:0;margin-top:.1rem;}
+.sl-info{flex:1;}
+.sl-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.2rem;}
+.sl-desc{font-size:.75rem;color:var(--muted);line-height:1.4;}
+.sl-kpis{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem;}
+.sl-kpi-tag{font-family:'Share Tech Mono',monospace;font-size:.5rem;padding:.12rem .45rem;border-radius:3px;background:rgba(245,166,35,.1);color:var(--amber);}
+.sl-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;flex-shrink:0;transition:color .15s;}
+.sl-del:hover{color:var(--red);}
+
+/* Editor form */
+.ed-form{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.25rem;}
+.ed-form h4{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.04em;text-transform:uppercase;color:var(--amber);margin-bottom:1.1rem;border-bottom:1px solid var(--border);padding-bottom:.5rem;}
+.ef-field{margin-bottom:.9rem;}
+.ef-label{font-family:'Share Tech Mono',monospace;font-size:.56rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.3rem;}
+.ef-input,.ef-textarea,.ef-select{
+  width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:8px;
+  padding:.6rem .85rem;color:var(--text);font-family:'Barlow',sans-serif;font-size:.88rem;
+  outline:none;transition:border-color .18s;
+}
+.ef-input:focus,.ef-textarea:focus,.ef-select:focus{border-color:var(--amber);}
+.ef-textarea{resize:vertical;min-height:80px;line-height:1.6;}
+.ef-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.ef-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;}
+@media(max-width:550px){.ef-grid,.ef-grid-3{grid-template-columns:1fr;}}
+
+/* Decision editor inside scenario */
+.decision-editor{border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.75rem;background:var(--card);}
+.de-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;}
+.de-letter{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.4rem;color:var(--amber);}
+
+/* ══════════════════════════════════════════
+   SHARED COMPONENTS
+══════════════════════════════════════════ */
+.btn{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;
+  letter-spacing:.05em;text-transform:uppercase;padding:.6rem 1.4rem;border-radius:8px;
+  border:1px solid var(--border2);color:var(--muted);background:var(--card);
+  cursor:pointer;transition:all .18s;
+}
+.btn:hover{border-color:var(--muted);color:var(--text);}
+.btn-amber{border-color:var(--amber);color:var(--amber);background:rgba(245,166,35,.08);}
+.btn-amber:hover{background:var(--amber);color:var(--bg);}
+.btn-red{border-color:var(--red);color:var(--red);background:rgba(255,71,87,.08);}
+.btn-red:hover{background:var(--red);color:#fff;}
+.btn-teal{border-color:var(--teal);color:var(--teal);background:rgba(0,201,167,.08);}
+.btn-teal:hover{background:var(--teal);color:var(--bg);}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:9900;
+  background:var(--panel);border:1px solid var(--amber);border-radius:10px;
+  padding:.7rem 1.2rem;font-family:'Share Tech Mono',monospace;font-size:.68rem;
+  letter-spacing:.08em;color:var(--amber);opacity:0;transform:translateY(8px);
+  transition:all .3s;pointer-events:none;max-width:300px;
+}
+.toast.show{opacity:1;transform:none;}
+
+/* Pulse animation */
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+.pulse{animation:pulse 1.5s ease-in-out infinite;}
+
+/* Impact flash */
+@keyframes flashGreen{0%{background:rgba(46,213,115,.2);}100%{background:transparent;}}
+@keyframes flashRed{0%{background:rgba(255,71,87,.2);}100%{background:transparent;}}
+.flash-green{animation:flashGreen .8s ease;}
+.flash-red{animation:flashRed .8s ease;}
+
+/* Responsive sidebar collapse */
+@media(max-width:700px){
+  #screen-game{flex-direction:column;}
+  .sidebar{width:100%;max-height:220px;flex-direction:row;flex-wrap:wrap;}
+  .content-area{padding:1rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     SCREEN: SETUP
+════════════════════════════════════════ -->
+<div class="screen active" id="screen-setup">
+  <div class="setup-logo">
+    <div class="eyebrow">Supply Chain Operations Reference</div>
+    <h1>SCOR<br><span>Command</span></h1>
+    <p>A competitive KPI simulation for supply chain teams. Make decisions. Move metrics. Win the quarter.</p>
+  </div>
+
+  <div class="setup-card">
+    <!-- KPI Focus -->
+    <div class="setup-section">
+      <h3>🎯 Select Focus KPI <span style="font-size:.7rem;font-weight:400;color:var(--muted);">(choose 1 — drives scenario scoring)</span></h3>
+      <div id="kpiPicker"></div>
+    </div>
+
+    <!-- Teams -->
+    <div class="setup-section">
+      <h3>👥 Number of Teams</h3>
+      <div class="team-count-row">
+        <button class="tc-btn" onclick="setTeamCount(1)">1</button>
+        <button class="tc-btn active" onclick="setTeamCount(2)">2</button>
+        <button class="tc-btn" onclick="setTeamCount(3)">3</button>
+        <button class="tc-btn" onclick="setTeamCount(4)">4</button>
+      </div>
+      <div class="team-inputs" id="teamInputs">
+        <div class="team-input-wrap show" id="twrap-0">
+          <div class="team-label"><span class="team-dot" style="background:var(--t1)"></span>Team 1</div>
+          <input class="team-name-input" id="tname-0" value="Alpha" maxlength="20">
+        </div>
+        <div class="team-input-wrap show" id="twrap-1">
+          <div class="team-label"><span class="team-dot" style="background:var(--t2)"></span>Team 2</div>
+          <input class="team-name-input" id="tname-1" value="Bravo" maxlength="20">
+        </div>
+        <div class="team-input-wrap" id="twrap-2">
+          <div class="team-label"><span class="team-dot" style="background:var(--t3)"></span>Team 3</div>
+          <input class="team-name-input" id="tname-2" value="Charlie" maxlength="20">
+        </div>
+        <div class="team-input-wrap" id="twrap-3">
+          <div class="team-label"><span class="team-dot" style="background:var(--t4)"></span>Team 4</div>
+          <input class="team-name-input" id="tname-3" value="Delta" maxlength="20">
+        </div>
+      </div>
+    </div>
+
+    <!-- Rounds -->
+    <div class="setup-section">
+      <h3>🔄 Number of Rounds</h3>
+      <div class="rounds-row">
+        <button class="round-btn" onclick="setRounds(3)">3</button>
+        <button class="round-btn active" onclick="setRounds(5)">5</button>
+        <button class="round-btn" onclick="setRounds(8)">8</button>
+        <button class="round-btn" onclick="setRounds(10)">10</button>
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="startGame()">Launch Simulation →</button>
+    <div style="text-align:center;margin-top:.75rem;">
+      <button class="btn" onclick="showScreen('editor')" style="font-size:.75rem;">✏️ Edit Scenarios & KPIs</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: GAME
+════════════════════════════════════════ -->
+<div class="screen" id="screen-game">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-top">
+      <div class="game-logo">⬡ SCOR Command</div>
+      <div class="game-meta" id="gameMeta">Round 1 · Team Alpha's Turn</div>
+    </div>
+
+    <div class="round-tracker">
+      <div class="rt-label">Progress</div>
+      <div class="rt-dots" id="roundDots"></div>
+    </div>
+
+    <div class="focus-badge">
+      <div class="fb-label">Focus KPI</div>
+      <div class="fb-name" id="focusKpiName">—</div>
+    </div>
+
+    <div class="scoreboard">
+      <div class="sb-title">Live Scoreboard</div>
+      <div id="scoreboard"></div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main-area">
+    <div class="game-header">
+      <div>
+        <div class="gh-phase" id="ghPhase">SCENARIO BRIEF</div>
+        <div class="gh-turn" id="ghTurn">—</div>
+      </div>
+      <div class="gh-actions">
+        <button class="btn" onclick="showScreen('setup')" style="font-size:.7rem;">⬅ Exit</button>
+      </div>
+    </div>
+
+    <div class="content-area" id="contentArea">
+      <!-- Scenario + decisions rendered here -->
+    </div>
+
+    <div class="confirm-bar">
+      <div class="cb-hint" id="cbHint">SELECT A DECISION TO CONTINUE</div>
+      <button class="confirm-btn" id="confirmBtn" onclick="confirmDecision()" disabled>Confirm Decision</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: RESULTS
+════════════════════════════════════════ -->
+<div class="screen" id="screen-results">
+  <div class="results-wrap">
+    <div class="results-header">
+      <div class="eyebrow">Simulation Complete</div>
+      <h2>Final <span style="color:var(--amber)">Standings</span></h2>
+    </div>
+    <div class="podium" id="podium"></div>
+    <div class="kpi-final-table" id="kpiFinalTable"></div>
+    <div class="result-actions">
+      <button class="btn btn-amber" onclick="showScreen('setup')">New Game</button>
+      <button class="btn btn-teal" onclick="restartSameGame()">Replay Same Setup</button>
+      <button class="btn" onclick="showScreen('editor')">✏️ Edit Game</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: EDITOR
+════════════════════════════════════════ -->
+<div class="screen" id="screen-editor">
+<div class="editor-wrap">
+  <div class="ed-header">
+    <h2>Game <span style="color:var(--amber)">Editor</span></h2>
+    <button class="btn btn-amber" onclick="showScreen('setup')">← Back to Setup</button>
+  </div>
+
+  <div class="ed-tabs">
+    <button class="ed-tab active" onclick="edTab('scenarios',this)">📋 Scenarios</button>
+    <button class="ed-tab" onclick="edTab('kpis',this)">📊 KPI Library</button>
+    <button class="ed-tab" onclick="edTab('rules',this)">📖 How to Play</button>
+  </div>
+
+  <!-- SCENARIOS PANEL -->
+  <div class="ed-panel active" id="edPanel-scenarios">
+    <div class="scenario-list" id="edScenarioList"></div>
+    <div class="ed-form" id="edScenarioForm">
+      <h4>➕ Add New Scenario</h4>
+      <div class="ef-grid">
+        <div class="ef-field">
+          <label class="ef-label">Title</label>
+          <input class="ef-input" id="newScTitle" placeholder="Port Strike Disruption">
+        </div>
+        <div class="ef-field">
+          <label class="ef-label">Category</label>
+          <select class="ef-select" id="newScCat">
+            <option>Disruption</option><option>Opportunity</option>
+            <option>Compliance</option><option>Technology</option>
+            <option>Market Shift</option><option>Sustainability</option>
+          </select>
+        </div>
+      </div>
+      <div class="ef-field">
+        <label class="ef-label">Scenario Description</label>
+        <textarea class="ef-textarea" id="newScDesc" placeholder="Describe the supply chain situation teams will face..."></textarea>
+      </div>
+      <div class="ef-field">
+        <label class="ef-label">Affected KPIs (comma separated, e.g. RL.1.1,RS.1.1)</label>
+        <input class="ef-input" id="newScKpis" placeholder="RL.1.1, RS.1.1, CO.1.1">
+      </div>
+
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);margin:.9rem 0 .6rem;border-top:1px solid var(--border);padding-top:.75rem;">
+        Decisions (A, B, C — minimum 2, maximum 4)
+      </div>
+      <div id="newScDecisions">
+        <div class="decision-editor"><div class="de-header"><span class="de-letter">A</span></div>
+          <div class="ef-field"><label class="ef-label">Title</label><input class="ef-input dec-title" placeholder="Activate backup suppliers"></div>
+          <div class="ef-field"><label class="ef-label">Description</label><textarea class="ef-textarea dec-desc" placeholder="Detailed description of this choice..."></textarea></div>
+          <div class="ef-field"><label class="ef-label">KPI Impacts (code:delta, e.g. RL.1.1:+8,RS.1.1:-3,CO.1.1:-5)</label><input class="ef-input dec-impacts" placeholder="RL.1.1:+8,RS.1.1:-3"></div>
+        </div>
+        <div class="decision-editor"><div class="de-header"><span class="de-letter">B</span></div>
+          <div class="ef-field"><label class="ef-label">Title</label><input class="ef-input dec-title" placeholder="Absorb the delay, communicate to customers"></div>
+          <div class="ef-field"><label class="ef-label">Description</label><textarea class="ef-textarea dec-desc" placeholder="Description..."></textarea></div>
+          <div class="ef-field"><label class="ef-label">KPI Impacts</label><input class="ef-input dec-impacts" placeholder="RL.1.1:-12,CO.1.1:+5"></div>
+        </div>
+        <div class="decision-editor"><div class="de-header"><span class="de-letter">C</span></div>
+          <div class="ef-field"><label class="ef-label">Title</label><input class="ef-input dec-title" placeholder="Air freight reroute (premium cost)"></div>
+          <div class="ef-field"><label class="ef-label">Description</label><textarea class="ef-textarea dec-desc" placeholder="Description..."></textarea></div>
+          <div class="ef-field"><label class="ef-label">KPI Impacts</label><input class="ef-input dec-impacts" placeholder="RL.1.1:+15,CO.1.1:-18,CO.1.2:-12"></div>
+        </div>
+      </div>
+      <button class="btn btn-amber" onclick="saveScenario()" style="margin-top:.75rem;">Save Scenario</button>
+    </div>
+  </div>
+
+  <!-- KPI PANEL -->
+  <div class="ed-panel" id="edPanel-kpis">
+    <div class="ed-form">
+      <h4>📊 KPI Library</h4>
+      <div id="kpiLibraryTable"></div>
+      <div style="margin-top:1.25rem;border-top:1px solid var(--border);padding-top:1rem;">
+        <h4 style="margin-bottom:.75rem;">➕ Add Custom KPI</h4>
+        <div class="ef-grid-3">
+          <div class="ef-field"><label class="ef-label">Code</label><input class="ef-input" id="newKpiCode" placeholder="XX.1.5"></div>
+          <div class="ef-field"><label class="ef-label">Name</label><input class="ef-input" id="newKpiName" placeholder="Inventory Accuracy"></div>
+          <div class="ef-field"><label class="ef-label">Category</label><input class="ef-input" id="newKpiCat" placeholder="AM"></div>
+        </div>
+        <div class="ef-field"><label class="ef-label">Description</label><input class="ef-input" id="newKpiDesc" placeholder="Brief one-line description"></div>
+        <div class="ef-grid">
+          <div class="ef-field"><label class="ef-label">Unit</label><select class="ef-select" id="newKpiUnit"><option>%</option><option>days</option><option>ratio</option><option>$M</option></select></div>
+          <div class="ef-field"><label class="ef-label">Higher is Better?</label><select class="ef-select" id="newKpiDir"><option value="1">Yes (↑ good)</option><option value="-1">No (↓ good)</option></select></div>
+        </div>
+        <button class="btn btn-amber" onclick="addCustomKpi()">Add KPI</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW TO PLAY PANEL -->
+  <div class="ed-panel" id="edPanel-rules">
+    <div class="ed-form">
+      <h4>📖 How to Play</h4>
+      <div style="font-size:.88rem;color:#a0b0c8;line-height:1.85;">
+        <div style="background:var(--card);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:.85rem;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--amber);font-size:1rem;margin-bottom:.35rem;">① Setup</div>
+          Choose a <strong style="color:var(--text)">Focus KPI</strong> — this KPI scores double points this session. Set team count (1-4) and names. Choose how many rounds.
+        </div>
+        <div style="background:var(--card);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:.85rem;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--teal);font-size:1rem;margin-bottom:.35rem;">② Each Round</div>
+          A <strong style="color:var(--text)">scenario card</strong> presents a real supply chain situation. Each team reads the same scenario and selects one of 3-4 strategic decisions simultaneously. Then decisions are revealed and KPIs update.
+        </div>
+        <div style="background:var(--card);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:.85rem;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--purple);font-size:1rem;margin-bottom:.35rem;">③ Scoring</div>
+          Each decision impacts specific KPIs by +/- points. The Focus KPI impact counts <strong style="color:var(--text)">double</strong>. Teams accumulate a cumulative score across all KPI movements. Highest total score wins.
+        </div>
+        <div style="background:var(--card);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:.85rem;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--green);font-size:1rem;margin-bottom:.35rem;">④ Adding Content</div>
+          Use the <strong style="color:var(--text)">Scenarios tab</strong> to add custom scenarios. Each scenario needs a title, description, and 2-4 decisions with KPI impacts. Format: <span style="font-family:'Share Tech Mono',monospace;color:var(--amber)">KPI_CODE:±delta</span> e.g. <span style="font-family:'Share Tech Mono',monospace;color:var(--amber)">RL.1.1:+8,CO.1.1:-5</span>
+        </div>
+        <div style="background:var(--card);border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:1rem 1.25rem;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--red);font-size:1rem;margin-bottom:.35rem;">⑤ Multiplayer</div>
+          In a classroom: 1 screen, teams write their choice on paper, facilitator selects each team's choice in sequence. Or each team uses their own device — facilitator advances each turn. The game is designed so each team sees the same scenario and makes a blind choice before seeing others' results.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   KPI MASTER DATA
+══════════════════════════════════════════ */
+let KPI_DATA = [
+  {code:'RL.1.1',name:'Perfect Customer Order Fulfillment',cat:'RL',unit:'%',dir:1,desc:'% of orders delivered perfectly (on time, complete, damage-free, correct docs)',baseline:85},
+  {code:'RL.1.2',name:'Perfect Supplier Order Fulfillment',cat:'RL',unit:'%',dir:1,desc:'% of supplier orders received perfectly',baseline:80},
+  {code:'RL.1.3',name:'Perfect Return Order Fulfillment',cat:'RL',unit:'%',dir:1,desc:'% of return orders processed perfectly',baseline:75},
+  {code:'RS.1.1',name:'Customer Order Fulfillment Cycle Time',cat:'RS',unit:'days',dir:-1,desc:'Average time from order placement to customer receipt',baseline:7},
+  {code:'AG.1.1',name:'Supply Chain Agility',cat:'AG',unit:'%',dir:1,desc:'Ability to respond to unplanned demand changes',baseline:70},
+  {code:'CO.1.1',name:'Total SC Management Cost',cat:'CO',unit:'%',dir:-1,desc:'Total supply chain cost as % of revenue',baseline:12},
+  {code:'CO.1.2',name:'Cost of Goods Sold (COGS)',cat:'CO',unit:'%',dir:-1,desc:'COGS as % of revenue',baseline:58},
+  {code:'PR.1.1',name:'EBIT as % of Revenue',cat:'PR',unit:'%',dir:1,desc:'Earnings Before Interest & Taxes as % of revenue',baseline:18},
+  {code:'PR.1.2',name:'Effective Tax Rate',cat:'PR',unit:'%',dir:-1,desc:'Effective tax rate on profits',baseline:22},
+  {code:'AM.1.1',name:'Cash-to-Cash Cycle Time',cat:'AM',unit:'days',dir:-1,desc:'Days between paying suppliers and receiving from customers',baseline:45},
+  {code:'AM.1.2',name:'Return on Fixed Assets',cat:'AM',unit:'%',dir:1,desc:'EBIT / fixed assets value',baseline:24},
+  {code:'AM.1.3',name:'Return on Working Capital',cat:'AM',unit:'%',dir:1,desc:'EBIT / working capital',baseline:32},
+];
+
+/* ══════════════════════════════════════════
+   SCENARIO MASTER DATA
+══════════════════════════════════════════ */
+let SCENARIOS = [
+  {
+    id:'s01',title:'Major Port Strike — 3-Week Disruption',cat:'Disruption',
+    desc:'Dockworkers at your primary import port have called an indefinite strike. 40% of your inbound goods are affected. Customers are already asking for status updates. You have limited buffer inventory.',
+    affectedKpis:['RL.1.1','RS.1.1','CO.1.1','AG.1.1'],
+    decisions:[
+      {letter:'A',title:'Activate Pre-Qualified Backup Suppliers',desc:'Immediately trigger your Tier-2 supplier agreements. Higher unit cost (+15%) but maintains flow. Requires procurement team mobilization.',impacts:{RL_1_1:+8,RS_1_1:-4,CO_1_1:-9,AG_1_1:+12}},
+      {letter:'B',title:'Air Freight Critical SKUs Only',desc:'Identify top 20% of SKUs by revenue and air freight those. Remaining 80% delayed. High cost, partial service recovery.',impacts:{RL_1_1:+3,RS_1_1:+5,CO_1_1:-18,CO_1_2:-8,PR_1_1:-6}},
+      {letter:'C',title:'Transparent Customer Communication + Partial Ship',desc:'Proactively notify all customers, offer partial shipments from in-stock inventory, priority to key accounts. Accept the delay.',impacts:{RL_1_1:-8,RS_1_1:-12,AG_1_1:+5,PR_1_1:+2}},
+      {letter:'D',title:'Reroute via Alternative Port (+5 days)',desc:'Redirect shipments to secondary port 400km away. +5 days transit, moderate trucking cost increase. Maintains full volume.',impacts:{RL_1_1:+4,RS_1_1:-7,CO_1_1:-5,CO_1_2:-3}},
+    ]
+  },
+  {
+    id:'s02',title:'Flash Demand Spike — 180% of Forecast',cat:'Market Shift',
+    desc:'A viral social media campaign for your product has driven demand to 180% of forecast. Customers are placing emergency orders. Your production is at 100% capacity with a 3-week lead time.',
+    affectedKpis:['RL.1.1','RS.1.1','AG.1.1','AM.1.3'],
+    decisions:[
+      {letter:'A',title:'Enforce Allocation — Fair Share to All Customers',desc:'Implement controlled allocation: each customer gets a capped % of their usual order. Prevents stockouts for strategic accounts.',impacts:{RL_1_1:+5,RS_1_1:-8,AG_1_1:+8,AM_1_3:+6}},
+      {letter:'B',title:'Priority to Top 20% Customers (Revenue-Ranked)',desc:'Fully serve your most profitable customers first. Remainder wait. Risk of damaging smaller but loyal accounts.',impacts:{RL_1_1:-4,RS_1_1:+5,AG_1_1:+4,PR_1_1:+10}},
+      {letter:'C',title:'Emergency Overtime + Contract Manufacturing',desc:'Run 3-shift operations and engage contract manufacturer. +30% production cost but captures the revenue opportunity.',impacts:{RL_1_1:+12,RS_1_1:+6,CO_1_1:-14,CO_1_2:-10,AM_1_3:+8}},
+    ]
+  },
+  {
+    id:'s03',title:'Key Supplier Financial Distress Warning',cat:'Disruption',
+    desc:'Intelligence reports indicate your single-source Tier-1 supplier (provides 35% of components) is facing financial difficulties. Risk of supply interruption within 60-90 days is rated HIGH.',
+    affectedKpis:['RL.1.2','RL.1.1','CO.1.1','AG.1.1'],
+    decisions:[
+      {letter:'A',title:'Build 90-Day Safety Stock Now',desc:'Immediately purchase buffer inventory from this supplier. Locks capital, increases carrying costs, but protects against stoppage.',impacts:{RL_1_1:+10,RL_1_2:+8,CO_1_1:-10,AM_1_1:-8,AM_1_3:-5}},
+      {letter:'B',title:'Accelerate Dual-Sourcing Initiative',desc:'Fast-track qualification of 2 alternative suppliers. 60-day qualification process. Some risk window remains.',impacts:{RL_1_2:+12,AG_1_1:+15,CO_1_1:-8,RS_1_1:-5}},
+      {letter:'C',title:'Provide Supplier Financial Support (Advance Payment)',desc:'Offer advance payment to keep supplier solvent. Helps them but ties up your cash and doesn\'t solve root cause.',impacts:{RL_1_2:+6,AM_1_1:-12,AM_1_3:-7,PR_1_1:-4}},
+    ]
+  },
+  {
+    id:'s04',title:'Warehouse Automation Investment Decision',cat:'Technology',
+    desc:'A $2.4M warehouse robotics system promises to reduce pick-pack labor by 40%, improve accuracy to 99.8%, and cut cycle time by 30%. Payback period estimated at 2.8 years.',
+    affectedKpis:['RL.1.1','RS.1.1','CO.1.1','AM.1.2'],
+    decisions:[
+      {letter:'A',title:'Full Deployment — Phase 1 Start Now',desc:'Authorize full investment. 6-month implementation disruption expected, then step-change improvement.',impacts:{RL_1_1:+15,RS_1_1:+12,CO_1_1:+8,AM_1_2:+10,PR_1_1:-4}},
+      {letter:'B',title:'Pilot One Zone — Prove ROI First',desc:'Invest in 1 of 4 zones. Lower risk, slower benefit, conservative capital deployment.',impacts:{RL_1_1:+5,RS_1_1:+4,CO_1_1:+2,AM_1_2:+3}},
+      {letter:'C',title:'Defer — Optimize Current Processes Instead',desc:'Invest in training, layout redesign, and WMS upgrade instead. Fraction of cost, moderate improvement.',impacts:{RL_1_1:+4,RS_1_1:+3,CO_1_1:+4,PR_1_1:+3}},
+      {letter:'D',title:'Lease Option — Capex to Opex',desc:'Negotiate a robotics-as-a-service lease. Higher long-term cost but preserves capital. Immediate benefits.',impacts:{RL_1_1:+13,RS_1_1:+10,CO_1_1:-3,AM_1_2:+6,AM_1_1:-4}},
+    ]
+  },
+  {
+    id:'s05',title:'Carbon Border Tax Compliance Deadline',cat:'Compliance',
+    desc:'New regulatory requirement: all imported goods must carry certified carbon footprint documentation within 90 days or face 8% surcharge. 60% of your supplier base is not yet compliant.',
+    affectedKpis:['RL.1.2','CO.1.2','CO.1.1','PR.1.2'],
+    decisions:[
+      {letter:'A',title:'Supplier Compliance Program — Full Support',desc:'Fund and deploy a supplier audit + support program. High cost, builds long-term resilience, strong compliance.',impacts:{RL_1_2:+10,CO_1_1:-12,CO_1_2:-4,PR_1_2:+8,AG_1_1:+6}},
+      {letter:'B',title:'Switch to Pre-Certified Suppliers Only',desc:'Immediately source only from already-certified suppliers. May disrupt current relationships and increase unit costs.',impacts:{RL_1_2:-5,CO_1_2:-10,PR_1_2:+12,AG_1_1:-8}},
+      {letter:'C',title:'Absorb the Surcharge Short-Term',desc:'Pay the 8% tax while working toward compliance. Simplest short-term path, hits margins now.',impacts:{CO_1_1:-8,CO_1_2:-8,PR_1_1:-10,PR_1_2:-5}},
+    ]
+  },
+  {
+    id:'s06',title:'Customer Returns Surge — 22% Return Rate',cat:'Market Shift',
+    desc:'A product quality issue has driven returns to 22% (industry norm: 8%). Root cause is a manufacturing defect affecting batches from months 3-5. 40,000 units are in the field.',
+    affectedKpis:['RL.1.3','RL.1.1','CO.1.1','PR.1.1'],
+    decisions:[
+      {letter:'A',title:'Proactive Full Recall + Replacement Program',desc:'Recall all affected units proactively. Maximum cost, maximum customer satisfaction and trust preservation.',impacts:{RL_1_3:+15,RL_1_1:+8,CO_1_1:-22,PR_1_1:-15,AG_1_1:+5}},
+      {letter:'B',title:'Reactive Replacement — Returns Only',desc:'Process returns as they arrive, no proactive outreach. Lower cost but reputational risk if issue becomes public.',impacts:{RL_1_3:+5,RL_1_1:-5,CO_1_1:-8,PR_1_1:-5}},
+      {letter:'C',title:'Redesign Return Process + Repair Option',desc:'Create an efficient returns + repair program. Some units returned for free repair, reducing replacement cost.',impacts:{RL_1_3:+10,CO_1_1:-12,PR_1_1:-6,AM_1_3:+3}},
+    ]
+  },
+  {
+    id:'s07',title:'New Market Entry — Emerging Market Distribution',cat:'Opportunity',
+    desc:'Market research shows a high-growth emerging market where your product has strong demand potential. Entry requires setting up local distribution, possibly a 3PL partner or owned warehouse.',
+    affectedKpis:['RS.1.1','CO.1.1','AM.1.2','PR.1.1'],
+    decisions:[
+      {letter:'A',title:'3PL Partnership — Asset-Light Entry',desc:'Partner with established local 3PL. Fast, low capex, margin shared. Learn market before committing.',impacts:{RS_1_1:+6,CO_1_1:-5,AM_1_2:+8,PR_1_1:+6}},
+      {letter:'B',title:'Owned Distribution Center',desc:'Build or lease owned DC. 12-18 month setup, high upfront cost, maximum long-term control.',impacts:{RS_1_1:+12,CO_1_1:-18,AM_1_2:-5,PR_1_1:-4}},
+      {letter:'C',title:'E-Commerce Direct — No Physical Footprint',desc:'Sell direct online, cross-border shipping. Lowest entry cost, tests demand, limited volume potential.',impacts:{RS_1_1:-3,CO_1_1:+4,PR_1_1:+10,AM_1_1:+8}},
+    ]
+  },
+  {
+    id:'s08',title:'Working Capital Crisis — Extend Payment Terms?',cat:'Compliance',
+    desc:'Your CFO is pressuring the supply chain team to negotiate 90-day payment terms with all suppliers (currently averaging 45 days). This would free up $8M in working capital but may strain supplier relationships.',
+    affectedKpis:['AM.1.1','AM.1.3','RL.1.2','PR.1.1'],
+    decisions:[
+      {letter:'A',title:'Negotiate 90-Day Terms — All Suppliers',desc:'Push full extension across the board. Cash positive immediately, but supplier friction and potential service risk.',impacts:{AM_1_1:+18,AM_1_3:+12,RL_1_2:-8,CO_1_1:-3}},
+      {letter:'B',title:'Supply Chain Finance Program (Early Pay Discount)',desc:'Offer suppliers early payment at a slight discount via SCF bank. Win-win: suppliers get cash, you optimize DPO.',impacts:{AM_1_1:+10,AM_1_3:+8,RL_1_2:+5,PR_1_1:+4}},
+      {letter:'C',title:'Tiered Approach — Negotiate by Supplier Size',desc:'Large suppliers get 90 days, small/critical suppliers stay at 45. Balanced risk management.',impacts:{AM_1_1:+8,AM_1_3:+6,RL_1_2:+2,CO_1_1:+2}},
+    ]
+  },
+];
+
+/* ══════════════════════════════════════════
+   GAME STATE
+══════════════════════════════════════════ */
+const TEAM_COLORS=['t1','t2','t3','t4'];
+const TEAM_COLOR_VALS=['var(--t1)','var(--t2)','var(--t3)','var(--t4)'];
+
+let G = {
+  focusKpi: null,
+  teamCount: 2,
+  teams: [],
+  totalRounds: 5,
+  currentRound: 1,
+  currentTeamIdx: 0,
+  scenarioQueue: [],
+  currentScenario: null,
+  selectedDecision: null,
+  phase: 'team-turn', // team-turn | reveal | round-end
+  teamDecisions: [], // [{teamIdx, decision}] per round
+};
+
+/* ══════════════════════════════════════════
+   SCREEN MANAGEMENT
+══════════════════════════════════════════ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  if(id==='editor') refreshEditor();
+}
+
+/* ══════════════════════════════════════════
+   SETUP
+══════════════════════════════════════════ */
+const KPI_CATEGORIES = {
+  RL:{label:'Reliability',color:'#f5a623'},
+  RS:{label:'Responsiveness',color:'#00c9a7'},
+  AG:{label:'Agility',color:'#a29bfe'},
+  CO:{label:'Cost',color:'#ff6b81'},
+  PR:{label:'Asset — Profitability',color:'#1e90ff'},
+  AM:{label:'Asset Management',color:'#2ed573'},
+};
+
+function buildKpiPicker(){
+  const cats = [...new Set(KPI_DATA.map(k=>k.cat))];
+  const container = document.getElementById('kpiPicker');
+  container.innerHTML = '';
+  cats.forEach(cat=>{
+    const kpis = KPI_DATA.filter(k=>k.cat===cat);
+    const catInfo = KPI_CATEGORIES[cat]||{label:cat,color:'var(--amber)'};
+    const div = document.createElement('div');
+    div.className='kpi-category';
+    div.innerHTML=`<span class="kpi-cat-label" style="border-color:${catInfo.color};color:${catInfo.color}">${catInfo.label} (${cat})</span>
+      <div class="kpi-chips">${kpis.map(k=>`<div class="kpi-chip" data-code="${k.code}" onclick="selectKpi('${k.code}')" title="${k.desc}">${k.code} — ${k.name.length>28?k.name.substring(0,28)+'…':k.name}</div>`).join('')}</div>`;
+    container.appendChild(div);
+  });
+}
+
+function selectKpi(code){
+  G.focusKpi = code;
+  document.querySelectorAll('.kpi-chip').forEach(c=>{
+    c.classList.toggle('selected', c.dataset.code===code);
+  });
+}
+
+let setupTeamCount = 2;
+let setupRounds = 5;
+
+function setTeamCount(n){
+  setupTeamCount = n;
+  document.querySelectorAll('.tc-btn').forEach((b,i)=>b.classList.toggle('active',i===n-1));
+  for(let i=0;i<4;i++) document.getElementById('twrap-'+i).classList.toggle('show',i<n);
+}
+function setRounds(n){
+  setupRounds = n;
+  document.querySelectorAll('.round-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function startGame(){
+  if(!G.focusKpi){toast('Please select a Focus KPI first');return;}
+  // Build teams
+  const teamColors=[{bg:'var(--t1)',dim:'var(--t1d)'},{bg:'var(--t2)',dim:'var(--t2d)'},{bg:'var(--t3)',dim:'var(--t3d)'},{bg:'var(--t4)',dim:'var(--t4d)'}];
+  G.teamCount = setupTeamCount;
+  G.totalRounds = setupRounds;
+  G.currentRound = 1;
+  G.currentTeamIdx = 0;
+  G.teamDecisions = [];
+  G.teams = Array.from({length:setupTeamCount},(_,i)=>({
+    idx:i,
+    name:document.getElementById('tname-'+i).value.trim()||`Team ${i+1}`,
+    color:teamColors[i],
+    score:0,
+    kpiScores:{}
+  }));
+  // Initialize KPI scores for teams
+  G.teams.forEach(t=>{
+    KPI_DATA.forEach(k=>{t.kpiScores[k.code]=k.baseline;});
+  });
+  // Shuffle and queue scenarios
+  const pool=[...SCENARIOS].sort(()=>Math.random()-.5);
+  G.scenarioQueue=[];
+  for(let i=0;i<G.totalRounds;i++) G.scenarioQueue.push(pool[i%pool.length]);
+
+  showScreen('game');
+  buildRoundDots();
+  renderScoreboard();
+  document.getElementById('focusKpiName').textContent = getKpi(G.focusKpi)?.name || G.focusKpi;
+  loadRound();
+}
+
+function getKpi(code){return KPI_DATA.find(k=>k.code===code);}
+
+/* ══════════════════════════════════════════
+   ROUND DOTS
+══════════════════════════════════════════ */
+function buildRoundDots(){
+  const wrap = document.getElementById('roundDots');
+  wrap.innerHTML = Array.from({length:G.totalRounds},(_,i)=>
+    `<div class="rt-dot ${i===0?'current':''}" id="rdot-${i}">${i+1}</div>`).join('');
+}
+function updateRoundDots(){
+  for(let i=0;i<G.totalRounds;i++){
+    const d=document.getElementById('rdot-'+i);
+    if(i<G.currentRound-1) d.className='rt-dot done';
+    else if(i===G.currentRound-1) d.className='rt-dot current';
+    else d.className='rt-dot';
+  }
+}
+
+/* ══════════════════════════════════════════
+   LOAD ROUND
+══════════════════════════════════════════ */
+function loadRound(){
+  G.currentScenario = G.scenarioQueue[G.currentRound-1];
+  G.currentTeamIdx = 0;
+  G.teamDecisions = [];
+  G.selectedDecision = null;
+  G.phase = 'team-turn';
+  updateRoundDots();
+  renderTurn();
+}
+
+function renderTurn(){
+  const team = G.teams[G.currentTeamIdx];
+  const sc = G.currentScenario;
+
+  document.getElementById('gameMeta').textContent = `Round ${G.currentRound} of ${G.totalRounds} · ${team.name}'s Turn`;
+  document.getElementById('ghPhase').textContent = `ROUND ${G.currentRound} — TEAM DECISION`;
+  document.getElementById('ghTurn').innerHTML = `<span style="color:${team.color.bg}">${team.name}</span> — Choose Your Strategy`;
+  document.getElementById('cbHint').textContent = 'SELECT A DECISION TO CONTINUE';
+  document.getElementById('confirmBtn').disabled = true;
+  document.getElementById('confirmBtn').className = 'confirm-btn';
+  document.getElementById('confirmBtn').textContent = 'Confirm Decision';
+  G.selectedDecision = null;
+
+  // Highlight current team in scoreboard
+  G.teams.forEach((t,i)=>{
+    const c=document.getElementById('tscard-'+i);
+    if(c) c.classList.toggle('current-turn',i===G.currentTeamIdx);
+  });
+
+  const content = document.getElementById('contentArea');
+  content.innerHTML = `
+    <div class="scenario-card">
+      <div class="sc-header">
+        <span class="sc-cat">${sc.cat}</span>
+        <span class="sc-round">Round ${G.currentRound}</span>
+        <h2 class="sc-title">${sc.title}</h2>
+      </div>
+      <div class="sc-body">${sc.desc}</div>
+      <div class="sc-impact-preview">
+        <span class="label" style="width:100%;margin-bottom:.3rem;">KPIs AFFECTED THIS ROUND</span>
+        ${sc.affectedKpis.map(k=>`<span class="sip-chip ${k===G.focusKpi?'focus':'affected'}">${k}${k===G.focusKpi?' ★':''}</span>`).join('')}
+      </div>
+    </div>
+    <div class="decisions-title">Strategic Options</div>
+    <div class="decisions-grid">
+      ${sc.decisions.map((d,di)=>renderDecisionCard(d,di)).join('')}
+    </div>`;
+}
+
+function renderDecisionCard(d,di){
+  const impacts = Object.entries(d.impacts);
+  const impactHtml = impacts.map(([k,v])=>{
+    const kcode = k.replace(/_/g,'.');
+    const isFocus = kcode===G.focusKpi;
+    const cls = v>0?'pos':v<0?'neg':'neu';
+    return `<span class="dc-impact ${cls}">${kcode}: ${v>0?'+':''}${v}${isFocus?' ★':''}${isFocus?' (×2)':''}</span>`;
+  }).join('');
+  return `<div class="decision-card" id="dcard-${di}" onclick="selectDecision(${di})">
+    <div class="dc-letter">${d.letter}</div>
+    <div class="dc-title">${d.title}</div>
+    <div class="dc-desc">${d.desc}</div>
+    <div class="dc-impacts">${impactHtml}</div>
+  </div>`;
+}
+
+function selectDecision(di){
+  G.selectedDecision = di;
+  document.querySelectorAll('.decision-card').forEach((c,i)=>c.classList.toggle('selected',i===di));
+  document.getElementById('cbHint').textContent = `DECISION ${G.currentScenario.decisions[di].letter} SELECTED — CONFIRM TO LOCK IN`;
+  const btn = document.getElementById('confirmBtn');
+  btn.disabled = false;
+  btn.className = 'confirm-btn ready';
+  btn.textContent = `Lock In: Option ${G.currentScenario.decisions[di].letter}`;
+}
+
+function confirmDecision(){
+  if(G.selectedDecision===null) return;
+  const d = G.currentScenario.decisions[G.selectedDecision];
+  G.teamDecisions.push({teamIdx:G.currentTeamIdx, decision:d});
+
+  if(G.currentTeamIdx < G.teamCount-1){
+    // Next team's turn
+    G.currentTeamIdx++;
+    G.selectedDecision = null;
+    renderTurn();
+    toast(`✓ ${G.teams[G.currentTeamIdx-1].name} decision locked. ${G.teams[G.currentTeamIdx].name} — your turn.`);
+  } else {
+    // All teams done — reveal results
+    revealResults();
+  }
+}
+
+/* ══════════════════════════════════════════
+   REVEAL
+══════════════════════════════════════════ */
+function revealResults(){
+  G.phase = 'reveal';
+  document.getElementById('ghPhase').textContent = `ROUND ${G.currentRound} — RESULTS`;
+  document.getElementById('ghTurn').textContent = 'All Decisions Revealed';
+  document.getElementById('cbHint').textContent = G.currentRound<G.totalRounds ? 'REVIEW RESULTS — ADVANCE TO NEXT ROUND' : 'VIEW FINAL STANDINGS';
+  document.getElementById('confirmBtn').disabled = false;
+  document.getElementById('confirmBtn').className = 'confirm-btn ready';
+  document.getElementById('confirmBtn').textContent = G.currentRound<G.totalRounds ? `Next Round (${G.currentRound+1}/${G.totalRounds}) →` : 'View Final Results →';
+  document.getElementById('confirmBtn').onclick = G.currentRound<G.totalRounds ? advanceRound : showFinalResults;
+
+  // Apply impacts and build reveal UI
+  let revealHtml = `<div class="scenario-card">
+    <div class="sc-header">
+      <span class="sc-cat">${G.currentScenario.cat}</span>
+      <span class="sc-round">Round ${G.currentRound} — Reveal</span>
+      <h2 class="sc-title">${G.currentScenario.title}</h2>
+    </div>
+  </div>
+  <div class="decisions-title">Team Decisions & KPI Impact</div>
+  <div class="decisions-grid">`;
+
+  G.teamDecisions.forEach(({teamIdx,decision})=>{
+    const team = G.teams[teamIdx];
+    let roundScore = 0;
+    const impactDetails = Object.entries(decision.impacts).map(([k,v])=>{
+      const kcode=k.replace(/_/g,'.');
+      const isFocus=kcode===G.focusKpi;
+      const kpiDef=getKpi(kcode);
+      const effectiveV = (kpiDef && kpiDef.dir===-1) ? -v : v; // invert for cost KPIs
+      const pts = isFocus ? effectiveV*2 : effectiveV;
+      roundScore+=pts;
+      team.kpiScores[kcode]=(team.kpiScores[kcode]||0)+v;
+      const cls=pts>0?'pos':pts<0?'neg':'neu';
+      return `<span class="dc-impact ${cls}">${kcode}: ${v>0?'+':''}${v}${isFocus?` ★ (×2, ${pts>0?'+':''}${pts}pts)`:''}</span>`;
+    }).join('');
+
+    team.score += Math.round(roundScore);
+    revealHtml+=`<div class="decision-card selected" style="border-color:${team.color.bg};">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.75rem;letter-spacing:.1em;color:${team.color.bg};margin-bottom:.5rem;text-transform:uppercase;">${team.name}</div>
+      <div class="dc-title">${decision.letter}: ${decision.title}</div>
+      <div class="dc-desc">${decision.desc}</div>
+      <div class="dc-impacts">${impactDetails}</div>
+      <div style="margin-top:.75rem;padding-top:.6rem;border-top:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem;color:${roundScore>=0?'var(--green)':'var(--red)'};">
+        ${roundScore>=0?'+':''}${Math.round(roundScore)} pts this round
+      </div>
+    </div>`;
+  });
+
+  revealHtml+='</div>';
+  document.getElementById('contentArea').innerHTML=revealHtml;
+  renderScoreboard();
+  G.teams.forEach((_,i)=>{const c=document.getElementById('tscard-'+i);if(c)c.classList.remove('current-turn');});
+}
+
+function advanceRound(){
+  document.getElementById('confirmBtn').onclick=confirmDecision;
+  G.currentRound++;
+  loadRound();
+}
+
+/* ══════════════════════════════════════════
+   SCOREBOARD
+══════════════════════════════════════════ */
+function renderScoreboard(){
+  const sorted=[...G.teams].sort((a,b)=>b.score-a.score);
+  const sb=document.getElementById('scoreboard');
+  const focusKpiDef=getKpi(G.focusKpi);
+  const kpisToShow=G.currentScenario?G.currentScenario.affectedKpis.slice(0,4):[G.focusKpi];
+
+  sb.innerHTML=G.teams.map((t,idx)=>{
+    const rank=sorted.findIndex(s=>s.idx===t.idx)+1;
+    const bars=kpisToShow.map(code=>{
+      const kdef=getKpi(code);if(!kdef)return'';
+      const val=t.kpiScores[code]||kdef.baseline;
+      const pct=Math.min(100,Math.max(0,(val/150)*100));
+      const barColor=code===G.focusKpi?'var(--amber)':t.color.bg;
+      return `<div class="tsm-bar-row">
+        <div class="tsm-bar-label" title="${kdef.name}">${code}</div>
+        <div class="tsm-bar-track"><div class="tsm-bar-fill" style="width:${pct}%;background:${barColor};"></div></div>
+        <div class="tsm-bar-val">${Math.round(val)}</div>
+      </div>`;
+    }).join('');
+    const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
+    return `<div class="team-score-card" id="tscard-${t.idx}" style="border-color:${t.color.bg}20;">
+      <div class="tsm-header">
+        <span class="tsm-name" style="color:${t.color.bg}">${t.name}</span>
+        <span class="tsm-rank" style="background:${t.color.dim};color:${t.color.bg}">${medal} #${rank}</span>
+      </div>
+      <div class="tsm-score" style="color:${t.color.bg}">${t.score}</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--muted);">POINTS</div>
+      <div class="tsm-kpi-bars">${bars}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════
+   FINAL RESULTS
+══════════════════════════════════════════ */
+function showFinalResults(){
+  showScreen('results');
+  const sorted=[...G.teams].sort((a,b)=>b.score-a.score);
+  const medals=['🥇','🥈','🥉','🏅'];
+  const rankClasses=['rank-1','rank-2','rank-3','rank-4'];
+
+  document.getElementById('podium').innerHTML=sorted.map((t,i)=>`
+    <div class="podium-card ${rankClasses[i]}" style="border-color:${t.color.bg}40;">
+      <div class="podium-rank">${i+1}</div>
+      <div class="podium-medal">${medals[i]}</div>
+      <div class="podium-name" style="color:${t.color.bg}">${t.name}</div>
+      <div class="podium-score" style="color:${t.color.bg}">${t.score}</div>
+      <div class="podium-score-label">Total Points</div>
+    </div>`).join('');
+
+  // KPI final table
+  const affectedKpis=[...new Set(G.scenarioQueue.flatMap(s=>s.affectedKpis))];
+  const cols=Math.max(3,G.teamCount+1);
+  const colStyle=`grid-template-columns: 160px ${G.teams.map(()=>'1fr').join(' ')}`;
+
+  let tableHtml=`
+    <div class="kft-head" style="${colStyle}">
+      <div>KPI</div>
+      ${G.teams.map(t=>`<div style="color:${t.color.bg}">${t.name}</div>`).join('')}
+    </div>`;
+
+  affectedKpis.forEach(code=>{
+    const kdef=getKpi(code);if(!kdef)return;
+    const isFocus=code===G.focusKpi;
+    tableHtml+=`<div class="kft-row" style="${colStyle}${isFocus?';background:rgba(245,166,35,.04)':''}">
+      <div class="kft-kpi">${isFocus?'★ ':''}<span title="${kdef.name}">${code}</span></div>
+      ${G.teams.map(t=>{
+        const val=Math.round(t.kpiScores[code]||kdef.baseline);
+        const delta=val-kdef.baseline;
+        const cls=delta>0===kdef.dir>0?'kft-val-good':'kft-val-bad';
+        return `<div class="${cls}">${val}${kdef.unit} ${delta>=0?'(+'+delta+')':'('+delta+')'}</div>`;
+      }).join('')}
+    </div>`;
+  });
+  document.getElementById('kpiFinalTable').innerHTML=tableHtml;
+}
+
+function restartSameGame(){
+  showScreen('game');
+  G.teams.forEach(t=>{t.score=0;KPI_DATA.forEach(k=>{t.kpiScores[k.code]=k.baseline;});});
+  G.currentRound=1;G.currentTeamIdx=0;G.teamDecisions=[];
+  G.scenarioQueue=[...SCENARIOS].sort(()=>Math.random()-.5).slice(0,G.totalRounds);
+  buildRoundDots();renderScoreboard();loadRound();
+}
+
+/* ══════════════════════════════════════════
+   EDITOR
+══════════════════════════════════════════ */
+function edTab(name,btn){
+  document.querySelectorAll('.ed-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.ed-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('edPanel-'+name).classList.add('active');
+}
+
+function refreshEditor(){
+  renderEdScenarios();
+  renderKpiLibrary();
+}
+
+function renderEdScenarios(){
+  const list=document.getElementById('edScenarioList');
+  list.innerHTML=SCENARIOS.map((s,i)=>`
+    <div class="sl-item">
+      <div class="sl-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="sl-info">
+        <div class="sl-title">${s.title}</div>
+        <div class="sl-desc">${s.desc.substring(0,100)}…</div>
+        <div class="sl-kpis">${s.affectedKpis.map(k=>`<span class="sl-kpi-tag">${k}</span>`).join('')}</div>
+      </div>
+      ${i>=8?`<button class="sl-del" onclick="deleteScenario(${i})">✕</button>`:'<span style="font-size:.6rem;color:var(--muted);flex-shrink:0;">built-in</span>'}
+    </div>`).join('');
+}
+
+function saveScenario(){
+  const title=document.getElementById('newScTitle').value.trim();
+  const cat=document.getElementById('newScCat').value;
+  const desc=document.getElementById('newScDesc').value.trim();
+  const kpisRaw=document.getElementById('newScKpis').value.trim();
+  if(!title||!desc){toast('Title and description required');return;}
+
+  const affectedKpis=kpisRaw.split(',').map(k=>k.trim()).filter(Boolean);
+  const decEls=document.querySelectorAll('#newScDecisions .decision-editor');
+  const decisions=[];
+  const letters='ABCD';
+  decEls.forEach((el,i)=>{
+    const t=el.querySelector('.dec-title').value.trim();
+    const d=el.querySelector('.dec-desc').value.trim();
+    const imp=el.querySelector('.dec-impacts').value.trim();
+    if(!t)return;
+    const impacts={};
+    imp.split(',').forEach(pair=>{
+      const [code,val]=pair.split(':');
+      if(code&&val) impacts[code.trim().replace(/\./g,'_')]=parseInt(val);
+    });
+    decisions.push({letter:letters[i],title:t,desc:d||'',impacts});
+  });
+
+  if(decisions.length<2){toast('Add at least 2 decisions');return;}
+
+  SCENARIOS.push({id:'custom_'+Date.now(),title,cat,desc,affectedKpis,decisions});
+  renderEdScenarios();
+  toast('Scenario added! It will appear in future games.');
+  ['newScTitle','newScDesc','newScKpis'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('.dec-title,.dec-desc,.dec-impacts').forEach(el=>el.value='');
+}
+
+function deleteScenario(i){SCENARIOS.splice(i,1);renderEdScenarios();toast('Scenario removed.');}
+
+function renderKpiLibrary(){
+  const el=document.getElementById('kpiLibraryTable');
+  const cats=[...new Set(KPI_DATA.map(k=>k.cat))];
+  el.innerHTML=cats.map(cat=>{
+    const kpis=KPI_DATA.filter(k=>k.cat===cat);
+    const catInfo=KPI_CATEGORIES[cat]||{label:cat,color:'var(--amber)'};
+    return `<div style="margin-bottom:1.25rem;">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:${catInfo.color};border-left:2px solid ${catInfo.color};padding-left:.6rem;margin-bottom:.5rem;">${catInfo.label}</div>
+      ${kpis.map((k,i)=>`
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;border-radius:8px;background:var(--card);border:1px solid var(--border);margin-bottom:.35rem;">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:${catInfo.color};width:60px;flex-shrink:0;">${k.code}</span>
+          <span style="flex:1;font-size:.82rem;">${k.name}</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);">${k.dir===1?'↑ good':'↓ good'} · ${k.unit}</span>
+          <button class="sl-del" onclick="removeKpi('${k.code}')" title="Remove">✕</button>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+function addCustomKpi(){
+  const code=document.getElementById('newKpiCode').value.trim();
+  const name=document.getElementById('newKpiName').value.trim();
+  const cat=document.getElementById('newKpiCat').value.trim().toUpperCase();
+  const desc=document.getElementById('newKpiDesc').value.trim();
+  const unit=document.getElementById('newKpiUnit').value;
+  const dir=+document.getElementById('newKpiDir').value;
+  if(!code||!name||!cat){toast('Code, name and category required');return;}
+  KPI_DATA.push({code,name,cat,unit,dir,desc,baseline:80});
+  renderKpiLibrary();buildKpiPicker();
+  ['newKpiCode','newKpiName','newKpiCat','newKpiDesc'].forEach(id=>document.getElementById(id).value='');
+  toast('KPI added to library!');
+}
+
+function removeKpi(code){
+  if(KPI_DATA.length<=3){toast('Cannot remove — minimum 3 KPIs required');return;}
+  KPI_DATA=KPI_DATA.filter(k=>k.code!==code);
+  renderKpiLibrary();buildKpiPicker();toast('KPI removed.');
+}
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+buildKpiPicker();
+selectKpi('RL.1.1'); // default selection
+</script>
+</body>
+</html>
