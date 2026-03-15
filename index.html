@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeForService | Digital Solutions</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --bg: #f4f7f6;
+            --text: #333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+        h1 { color: var(--primary); margin-bottom: 0.5rem; }
+        p { color: #666; margin-bottom: 2rem; }
+        .links-container {
+            display: grid;
+            gap: 1rem;
+        }
+        .app-card {
+            display: block;
+            text-decoration: none;
+            background: white;
+            border: 2px solid #eee;
+            padding: 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            color: var(--primary);
+        }
+        .app-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+        }
+        .app-card h3 { margin: 0 0 0.5rem 0; color: var(--accent); }
+        .app-card p { margin: 0; font-size: 0.9rem; color: #777; }
+        footer { margin-top: 2rem; font-size: 0.8rem; color: #999; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>BeForService</h1>
+    <p>Training & Supply Chain Digital Toolkits</p>
+
+    <div class="links-container">
+        <a href="https://beforservice.github.io/ctsc-bootcamp/" class="app-card">
+            <h3>CTSC Bootcamp</h3>
+            <p>Access training materials and curriculum resources.</p>
+        </a>
+
+        <a href="https://beforservice.github.io/ctsc-flashcards/" class="app-card">
+            <h3>CTSC Flashcards</h3>
+            <p>Interactive study tools for certification preparation.</p>
+        </a>
+    </div>
+
+    <footer>
+        &copy; 2026 BeForService Consulting & Training
+    </footer>
+</div>
+
+</body>
+</html>
