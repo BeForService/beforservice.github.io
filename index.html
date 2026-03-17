@@ -1,125 +1,706 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BeForService | Professional Toolkits</title>
-    <style>
-        :root {
-            --primary-dark: #1a252f; /* Deep Navy/Slate */
-            --accent-blue: #2980b9;  /* Professional Blue */
-            --bg-light: #ffffff;
-            --card-hover: #f8f9fa;
-        }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f0f2f5;
-            color: var(--primary-dark);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            background: var(--bg-light);
-            padding: 4rem 2rem;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-        }
-        /* Logo Styling */
-        .logo-placeholder {
-            max-width: 180px;
-            height: auto;
-            margin-bottom: 2rem;
-        }
-        h1 { 
-            font-size: 1.8rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            margin-bottom: 0.5rem; 
-        }
-        .subtitle { 
-            color: #6c757d; 
-            margin-bottom: 2.5rem;
-            font-size: 1.1rem;
-        }
-        .links-container {
-            display: grid;
-            gap: 1.25rem;
-        }
-        .app-card {
-            display: flex;
-            flex-direction: column;
-            text-decoration: none;
-            background: white;
-            border: 1px solid #e1e4e8;
-            padding: 1.5rem;
-            border-radius: 12px;
-            transition: all 0.2s ease-in-out;
-            text-align: left;
-        }
-        .app-card:hover {
-            border-color: var(--accent-blue);
-            background-color: var(--card-hover);
-            transform: translateY(-2px);
-        }
-        .app-card h3 { 
-            margin: 0 0 0.4rem 0; 
-            color: var(--accent-blue);
-            font-size: 1.2rem;
-        }
-        .app-card p { 
-            margin: 0; 
-            font-size: 0.95rem; 
-            color: #495057;
-            line-height: 1.4;
-        }
-        footer { 
-            margin-top: 3rem; 
-            font-size: 0.85rem; 
-            color: #adb5bd;
-            border-top: 1px solid #eee;
-            padding-top: 1.5rem;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BeForService | Supply Chain & Training Digital Solutions</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════
+   TOKENS
+══════════════════════════════════ */
+:root {
+  --ink:       #0d1117;
+  --ink-mid:   #3a4556;
+  --ink-soft:  #6b7a91;
+  --ink-faint: #b0bbc9;
+  --surface:   #ffffff;
+  --surface-2: #f5f7fa;
+  --surface-3: #eef1f6;
+  --border:    #e2e7ef;
+
+  --amber:  #e8940a;
+  --amber2: #f5b84a;
+  --teal:   #009a82;
+  --blue:   #1a6bbf;
+  --purple: #6552d4;
+  --red:    #c93040;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.04);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.05);
+}
+
+/* ══════════════════════════════════
+   RESET & BASE
+══════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  background: var(--surface-2);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════════
+   PAGE LAYOUT
+══════════════════════════════════ */
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 1.25rem 4rem;
+}
+
+/* ══════════════════════════════════
+   HEADER / BRAND
+══════════════════════════════════ */
+.header {
+  padding: 3.5rem 0 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem;
+  animation: fadeUp .5s ease both;
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+}
+
+/* Geometric logo mark — supply chain hexagon */
+.logo-mark {
+  width: 30px;
+  height: 30px;
+}
+
+.brand-text h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -.03em;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.brand-text .tagline {
+  font-size: .8rem;
+  color: var(--ink-soft);
+  margin-top: .2rem;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.header-desc {
+  font-size: 1rem;
+  color: var(--ink-mid);
+  line-height: 1.65;
+  max-width: 480px;
+}
+
+/* ══════════════════════════════════
+   SECTION LABEL
+══════════════════════════════════ */
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: .68rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ══════════════════════════════════
+   HERO CARD — SCOR COMMAND
+══════════════════════════════════ */
+.hero-section {
+  margin-bottom: 1rem;
+  animation: fadeUp .5s .1s ease both;
+}
+
+.hero-card {
+  display: block;
+  text-decoration: none;
+  background: var(--ink);
+  border-radius: 20px;
+  padding: 2rem 2rem 1.75rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform .25s ease, box-shadow .25s ease;
+  box-shadow: var(--shadow-lg);
+}
+.hero-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 60px rgba(0,0,0,.16), 0 6px 16px rgba(0,0,0,.08);
+}
+
+/* Scanline texture */
+.hero-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255,255,255,.015) 2px,
+    rgba(255,255,255,.015) 4px
+  );
+  pointer-events: none;
+}
+
+/* Amber glow */
+.hero-card::after {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,148,10,.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  background: rgba(232,148,10,.15);
+  border: 1px solid rgba(232,148,10,.3);
+  border-radius: 6px;
+  padding: .25rem .6rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .6rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--amber2);
+}
+
+.hero-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.hero-version {
+  font-family: 'DM Mono', monospace;
+  font-size: .6rem;
+  color: rgba(255,255,255,.25);
+  letter-spacing: .1em;
+}
+
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 2.25rem;
+  letter-spacing: -.04em;
+  line-height: .95;
+  color: #ffffff;
+  margin-bottom: .6rem;
+}
+
+.hero-title span { color: var(--amber); }
+
+.hero-desc {
+  font-size: .9rem;
+  color: rgba(255,255,255,.55);
+  line-height: 1.65;
+  margin-bottom: 1.75rem;
+  max-width: 380px;
+}
+
+.hero-scor-map {
+  display: flex;
+  gap: .3rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+
+.scor-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: .55rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: .2rem .55rem;
+  border-radius: 4px;
+  border: 1px solid rgba(0,154,130,.3);
+  color: rgba(0,210,178,.75);
+  background: rgba(0,154,130,.08);
+}
+
+.hero-stats {
+  display: flex;
+  gap: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #ffffff;
+  letter-spacing: -.03em;
+  line-height: 1;
+}
+
+.stat-num span { color: var(--amber); }
+
+.stat-label {
+  font-size: .7rem;
+  color: rgba(255,255,255,.3);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.hero-cta {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(232,148,10,.15);
+  border: 1px solid rgba(232,148,10,.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s, border-color .2s;
+}
+
+.hero-card:hover .hero-cta {
+  background: var(--amber);
+  border-color: var(--amber);
+}
+
+.hero-cta svg {
+  transition: transform .2s;
+}
+
+.hero-card:hover .hero-cta svg {
+  transform: translate(2px, -2px);
+}
+
+/* ══════════════════════════════════
+   TOOL GRID
+══════════════════════════════════ */
+.tools-section {
+  animation: fadeUp .5s .2s ease both;
+}
+
+.tools-grid {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+.tool-card {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  gap: 1.25rem;
+  transition: all .2s ease;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.tool-card:hover {
+  border-color: transparent;
+  box-shadow: var(--shadow-md), 0 0 0 1.5px var(--accent-color);
+  transform: translateY(-1px);
+}
+
+.tool-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.2rem;
+  background: var(--icon-bg);
+}
+
+.tool-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.tool-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--ink);
+  margin-bottom: .2rem;
+  letter-spacing: -.02em;
+}
+
+.tool-desc {
+  font-size: .85rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.tool-meta {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: .45rem;
+  flex-wrap: wrap;
+}
+
+.tool-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: .58rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .15rem .45rem;
+  border-radius: 4px;
+  background: var(--surface-3);
+  color: var(--ink-soft);
+}
+
+.tool-arrow {
+  color: var(--ink-faint);
+  flex-shrink: 0;
+  transition: color .2s, transform .2s;
+}
+
+.tool-card:hover .tool-arrow {
+  color: var(--accent-color);
+  transform: translateX(2px);
+}
+
+/* Individual card accents */
+.card-ctsc  { --accent-color: var(--blue);   --icon-bg: #eef4fb; }
+.card-flash { --accent-color: var(--teal);   --icon-bg: #e8f7f5; }
+.card-epi   { --accent-color: var(--purple); --icon-bg: #f0eefb; }
+
+/* ══════════════════════════════════
+   PLAYBOOK CALLOUT
+══════════════════════════════════ */
+.playbook-section {
+  margin-top: 1rem;
+  animation: fadeUp .5s .25s ease both;
+}
+
+.playbook-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #fdf8ef 0%, #fff 60%);
+  border: 1px solid rgba(232,148,10,.25);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 12px rgba(232,148,10,.08);
+}
+
+.playbook-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  background: rgba(232,148,10,.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.2rem;
+}
+
+.playbook-body { flex: 1; }
+
+.playbook-body strong {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: .95rem;
+  color: var(--ink);
+  display: block;
+  margin-bottom: .2rem;
+}
+
+.playbook-body p {
+  font-size: .83rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+/* ══════════════════════════════════
+   FOOTER
+══════════════════════════════════ */
+footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem;
+  animation: fadeUp .5s .35s ease both;
+}
+
+.footer-brand {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: .85rem;
+  color: var(--ink);
+}
+
+.footer-copy {
+  font-size: .78rem;
+  color: var(--ink-faint);
+}
+
+.footer-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.footer-links a {
+  font-size: .78rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: color .15s;
+}
+
+.footer-links a:hover { color: var(--blue); }
+
+/* ══════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .4; }
+}
+
+/* ══════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════ */
+@media (max-width: 480px) {
+  .hero-title { font-size: 1.85rem; }
+  .hero-stats  { gap: 1rem; }
+  .stat-num    { font-size: 1.15rem; }
+  .hero-cta    { display: none; }
+  footer       { flex-direction: column; align-items: flex-start; }
+}
+</style>
 </head>
 <body>
+<div class="page">
 
-<div class="container">
-    <img src="logo.png" alt="BeForService Logo" class="logo-placeholder">
-    
-    <h1>BeForService</h1>
-    <p class="subtitle">Supply Chain & Training Digital Solutions</p>
-
-    <div class="links-container">
-        <a href="https://beforservice.github.io/ctsc-bootcamp/" class="app-card">
-            <h3>CTSC Bootcamp</h3>
-            <p>Access curriculum resources and training roadmap.</p>
-        </a>
-
-        <a href="https://beforservice.github.io/ctsc-flashcards/" class="app-card">
-            <h3>CTSC Flashcards</h3>
-            <p>Interactive study tools for professional certification.</p>
-        </a>
-        <a href="Labo_Epidemiologie_v2.3_ISTM.html" class="app-card">
-            <h3>Epidemiology Practice</h3>
-            <p>Interactive exercises and learning tools for students.</p>
-        </a>
-
-        <a href="scor_command.html" class="app-card">
-            <h3>SCOR Simulation</h3>
-            <p>Interactive supply chain operations reference game.</p>
-        </a>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="brand-row">
+      <div class="logo-box">
+        <!-- Geometric supply chain mark -->
+        <svg class="logo-mark" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="15,2 26,8.5 26,21.5 15,28 4,21.5 4,8.5" stroke="#f5a623" stroke-width="1.5" fill="none"/>
+          <circle cx="15" cy="15" r="3.5" fill="#f5a623"/>
+          <line x1="15" y1="2"  x2="15" y2="11.5" stroke="#f5a623" stroke-width="1" opacity=".5"/>
+          <line x1="15" y1="18.5" x2="15" y2="28" stroke="#f5a623" stroke-width="1" opacity=".5"/>
+          <line x1="26" y1="8.5"  x2="17.5" y2="13.25" stroke="#00c9a7" stroke-width="1" opacity=".5"/>
+          <line x1="12.5" y1="16.75" x2="4" y2="21.5" stroke="#00c9a7" stroke-width="1" opacity=".5"/>
+          <line x1="4" y1="8.5"  x2="12.5" y2="13.25" stroke="#a29bfe" stroke-width="1" opacity=".5"/>
+          <line x1="17.5" y1="16.75" x2="26" y2="21.5" stroke="#a29bfe" stroke-width="1" opacity=".5"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>BeForService</h1>
+        <div class="tagline">Consulting & Training</div>
+      </div>
     </div>
+    <p class="header-desc">
+      Digital tools for supply chain education and professional development —
+      built on international standards, designed for real-world practice.
+    </p>
+  </header>
 
-    <footer>
-        &copy; 2026 BeForService Consulting & Training
-    </footer>
+  <!-- HERO: SCOR COMMAND -->
+  <section class="hero-section">
+    <div class="section-label">Featured</div>
+    <a href="scor_command.html" class="hero-card">
+      <div class="hero-top">
+        <div class="hero-badge">New · v3</div>
+        <span class="hero-version">SCOR-DS Edition</span>
+      </div>
+
+      <h2 class="hero-title">SCOR<br><span>Command</span></h2>
+      <p class="hero-desc">
+        A competitive KPI simulation grounded in the SCOR-DS framework.
+        Navigate supply chain trade-offs, diagnose systemic paradoxes,
+        and prove that global performance demands local sacrifice.
+      </p>
+
+      <div class="hero-scor-map">
+        <span class="scor-pill">Orchestrate</span>
+        <span class="scor-pill">Source</span>
+        <span class="scor-pill">Transform</span>
+        <span class="scor-pill">Order</span>
+        <span class="scor-pill">Fulfill</span>
+        <span class="scor-pill">Return</span>
+        <span class="scor-pill">Enable</span>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-num">14<span>+</span></div>
+          <div class="stat-label">Scenarios</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">19</div>
+          <div class="stat-label">KPIs</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">5</div>
+          <div class="stat-label">Attributes</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">EN<span>/</span>FR</div>
+          <div class="stat-label">Languages</div>
+        </div>
+      </div>
+
+      <div class="hero-cta">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 13L13 3M13 3H6M13 3V10" stroke="white" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </a>
+  </section>
+
+  <!-- PLAYBOOK NOTE -->
+  <section class="playbook-section">
+    <div class="playbook-card">
+      <div class="playbook-icon">📘</div>
+      <div class="playbook-body">
+        <strong>App Playbook & Toolkit available</strong>
+        <p>Complete instructor guide, scenario authoring standards, AI validation
+           system instruction, and maintenance documentation — 6 parts, 60+ pages.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- OTHER TOOLS -->
+  <section class="tools-section" style="margin-top: 2.5rem;">
+    <div class="section-label">All Tools</div>
+    <div class="tools-grid">
+
+      <a href="https://beforservice.github.io/ctsc-bootcamp/" class="tool-card card-ctsc">
+        <div class="tool-icon">🚀</div>
+        <div class="tool-body">
+          <div class="tool-name">CTSC Bootcamp</div>
+          <div class="tool-desc">Curriculum resources and structured training roadmap for CTSC professional certification preparation.</div>
+          <div class="tool-meta">
+            <span class="tool-tag">Curriculum</span>
+            <span class="tool-tag">Certification</span>
+          </div>
+        </div>
+        <svg class="tool-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3.5 9h11M9.5 4l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+
+      <a href="https://beforservice.github.io/ctsc-flashcards/" class="tool-card card-flash">
+        <div class="tool-icon">🃏</div>
+        <div class="tool-body">
+          <div class="tool-name">CTSC Flashcards</div>
+          <div class="tool-desc">Interactive study tools for professional certification — spaced repetition, self-assessment, and concept reinforcement.</div>
+          <div class="tool-meta">
+            <span class="tool-tag">Study</span>
+            <span class="tool-tag">Interactive</span>
+          </div>
+        </div>
+        <svg class="tool-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3.5 9h11M9.5 4l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+
+      <a href="Labo_Epidemiologie_v2.3_ISTM.html" class="tool-card card-epi">
+        <div class="tool-icon">🔬</div>
+        <div class="tool-body">
+          <div class="tool-name">Epidemiology Practice Lab</div>
+          <div class="tool-desc">Interactive exercises and guided learning tools for epidemiology students — ISTM programme edition.</div>
+          <div class="tool-meta">
+            <span class="tool-tag">Education</span>
+            <span class="tool-tag">Healthcare</span>
+          </div>
+        </div>
+        <svg class="tool-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3.5 9h11M9.5 4l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>
+      <div class="footer-brand">BeForService</div>
+      <div class="footer-copy">© 2026 BeForService Consulting & Training</div>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/beforservice">GitHub</a>
+      <a href="mailto:contact@beforservice.org">Contact</a>
+    </div>
+  </footer>
+
 </div>
-
 </body>
 </html>
