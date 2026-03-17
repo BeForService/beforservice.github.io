@@ -3,165 +3,101 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SCOR Command v3 — Enhanced Supply Chain Simulation</title>
+<title>SCOR Command v3</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800&family=Barlow:wght@300;400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-/* ══════════════════════════════════════════
-   TOKENS (Enhanced with light/dark mode support)
-══════════════════════════════════════════ */
 :root{
-  --bg:#0b0d11;
-  --panel:#111418;
-  --card:#171b22;
-  --border:#1e2530;
-  --border2:#252d3a;
-  --amber:#f5a623;
-  --amber2:#ffd07a;
-  --teal:#00c9a7;
-  --red:#ff4757;
-  --green:#2ed573;
-  --blue:#1e90ff;
-  --purple:#a29bfe;
-  --text:#dce4f0;
-  --muted:#5a6a82;
-  --dim:#2a3545;
-
+  --bg:#0b0d11; --panel:#111418; --card:#171b22;
+  --border:#1e2530; --border2:#252d3a;
+  --amber:#f5a623; --amber2:#ffd07a;
+  --teal:#00c9a7; --red:#ff4757; --green:#2ed573;
+  --blue:#1e90ff; --purple:#a29bfe;
+  --text:#dce4f0; --muted:#5a6a82; --dim:#2a3545;
   --t1:#f5a623; --t1d:rgba(245,166,35,.12);
   --t2:#00c9a7; --t2d:rgba(0,201,167,.12);
   --t3:#a29bfe; --t3d:rgba(162,155,254,.12);
   --t4:#ff6b81; --t4d:rgba(255,107,129,.12);
 }
-.light-mode {
-  --bg: #f0f4f8;
-  --panel: #ffffff;
-  --card: #e8eff5;
-  --border: #d1dbe6;
-  --border2: #c0ccd9;
-  --amber: #d98e1a;
-  --amber2: #ffb74d;
-  --teal: #00a388;
-  --red: #e8414f;
-  --green: #27b865;
-  --blue: #1a7de6;
-  --purple: #8e7fe3;
-  --text: #1a2533;
-  --muted: #6a7a92;
-  --dim: #b8c3d1;
-
-  --t1: #d98e1a; --t1d: rgba(245,166,35,.08);
-  --t2: #00a388; --t2d: rgba(0,201,167,.08);
-  --t3: #8e7fe3; --t3d: rgba(162,155,254,.08);
-  --t4: #e86a7e; --t4d: rgba(255,107,129,.08);
+.light-mode{
+  --bg:#f0f4f8; --panel:#ffffff; --card:#e8eff5;
+  --border:#d1dbe6; --border2:#c0ccd9;
+  --amber:#c97d10; --amber2:#e8a030;
+  --teal:#008f76; --red:#d63040; --green:#1fa050;
+  --blue:#1470cc; --purple:#6c5fc7;
+  --text:#1a2533; --muted:#6a7a92; --dim:#b8c3d1;
+  --t1:#c97d10; --t1d:rgba(201,125,16,.1);
+  --t2:#008f76; --t2d:rgba(0,143,118,.1);
+  --t3:#6c5fc7; --t3d:rgba(108,95,199,.1);
+  --t4:#cc4a5e; --t4d:rgba(204,74,94,.1);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;}
+body:not(.light-mode)::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);}
 
-/* ══ TYPOGRAPHY ══ */
+/* TYPOGRAPHY */
 .mono{font-family:'Share Tech Mono',monospace;}
-.condensed{font-family:'Barlow Condensed',sans-serif;}
 .label{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
 
-/* ══ SCANLINE OVERLAY (Optional in light mode) ══ */
-body::after{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);
-}
-.light-mode body::after { background: none; }
+/* TOOLTIP */
+.tooltip{position:relative;display:inline-block;}
+.tooltip .tt{visibility:hidden;width:210px;background:var(--panel);color:var(--text);font-family:'Barlow',sans-serif;font-size:.75rem;font-weight:400;text-align:left;border-radius:8px;padding:.55rem .75rem;position:absolute;z-index:200;bottom:130%;left:50%;transform:translateX(-50%);opacity:0;transition:opacity .2s;border:1px solid var(--border2);line-height:1.5;pointer-events:none;}
+.tooltip:hover .tt{visibility:visible;opacity:1;}
 
-/* ══ SCREENS ══ */
+/* SCREENS */
 .screen{display:none;min-height:100vh;}
 .screen.active{display:flex;flex-direction:column;}
 
-/* Enhanced: Global tooltip style */
-.tooltip { position: relative; display: inline-block; }
-.tooltip .tooltiptext { visibility: hidden; width: 220px; background: var(--panel); color: var(--text); text-align: center; border-radius: 6px; padding: 5px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; border: 1px solid var(--border); }
-.tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
-
-/* ══════════════════════════════════════════
-   SETUP SCREEN (Enhanced with difficulty levels)
-══════════════════════════════════════════ */
-#screen-setup{
-  align-items:center;justify-content:center;
-  padding:2rem 1rem;
-  background:radial-gradient(ellipse 70% 60% at 50% 40%,rgba(245,166,35,.06) 0%,transparent 70%);
-}
+/* ══ SETUP ══ */
+#screen-setup{align-items:center;justify-content:center;padding:2rem 1rem;
+  background:radial-gradient(ellipse 70% 60% at 50% 40%,rgba(245,166,35,.06) 0%,transparent 70%);}
 .setup-logo{text-align:center;margin-bottom:2rem;}
 .setup-logo .eyebrow{font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:.4em;color:var(--amber);text-transform:uppercase;margin-bottom:.6rem;}
 .setup-logo h1{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(3rem,8vw,5.5rem);letter-spacing:-.01em;line-height:.95;}
 .setup-logo h1 span{color:var(--amber);}
 .setup-logo p{color:var(--muted);font-size:.9rem;margin-top:.8rem;max-width:420px;margin-left:auto;margin-right:auto;}
-
-/* SCOR-DS Process map on setup */
-.scor-map{
-  display:flex;gap:.3rem;flex-wrap:wrap;justify-content:center;
-  margin-top:1rem;margin-bottom:0;
-}
-.scor-step{
-  font-family:'Share Tech Mono',monospace;font-size:.52rem;letter-spacing:.12em;
-  text-transform:uppercase;padding:.25rem .6rem;border-radius:4px;
-  border:1px solid var(--border2);color:var(--muted);
-}
-.scor-step.highlight{border-color:var(--teal);color:var(--teal);background:rgba(0,201,167,.07);}
-
+.setup-toolbar{display:flex;gap:.5rem;justify-content:center;margin-bottom:1rem;}
+.scor-map{display:flex;gap:.3rem;flex-wrap:wrap;justify-content:center;margin-top:1rem;}
+.scor-step{font-family:'Share Tech Mono',monospace;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;padding:.25rem .6rem;border-radius:4px;border:1px solid var(--border2);color:var(--muted);}
+.scor-step.highlight{border-color:var(--teal);color:var(--teal);background:rgba(0,201,167,.07);cursor:default;}
 .setup-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:2rem;width:100%;max-width:680px;}
 .setup-section{margin-bottom:2rem;}
 .setup-section:last-child{margin-bottom:0;}
 .setup-section h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.05em;text-transform:uppercase;color:var(--amber);margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:.5rem;}
-
-/* KPI picker */
 .kpi-category{margin-bottom:1rem;}
 .kpi-cat-label{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;padding:.2rem .6rem;border-left:2px solid var(--amber);display:block;}
 .kpi-chips{display:flex;flex-wrap:wrap;gap:.4rem;}
 .kpi-chip{font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:.05em;padding:.35rem .75rem;border-radius:6px;border:1px solid var(--border2);color:var(--muted);background:var(--card);cursor:pointer;transition:all .18s;white-space:nowrap;}
 .kpi-chip:hover{border-color:var(--amber);color:var(--amber2);}
 .kpi-chip.selected{border-color:var(--amber);color:var(--bg);background:var(--amber);font-weight:600;}
-
-/* Team setup */
-.team-count-row{display:flex;gap:.5rem;margin-bottom:1.25rem;}
-.tc-btn{flex:1;padding:.6rem;border-radius:8px;border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;color:var(--muted);background:var(--card);cursor:pointer;transition:all .18s;}
+.team-count-row,.rounds-row,.difficulty-row{display:flex;gap:.5rem;margin-bottom:.5rem;}
+.tc-btn,.round-btn,.diff-btn{flex:1;padding:.55rem;border-radius:8px;border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:var(--muted);background:var(--card);cursor:pointer;transition:all .18s;}
 .tc-btn.active{border-color:var(--amber);color:var(--amber);background:rgba(245,166,35,.08);}
-.team-inputs{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+.round-btn.active{border-color:var(--teal);color:var(--teal);background:rgba(0,201,167,.08);}
+.diff-btn.active{border-color:var(--purple);color:var(--purple);background:rgba(162,155,254,.08);}
+.team-inputs{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.75rem;}
 .team-input-wrap{display:none;}
 .team-input-wrap.show{display:block;}
 .team-label{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:.3rem;display:flex;align-items:center;gap:.5rem;}
 .team-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
 .team-name-input{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:.6rem .9rem;color:var(--text);font-family:'Barlow',sans-serif;font-size:.9rem;outline:none;transition:border-color .18s;}
 .team-name-input:focus{border-color:var(--amber);}
-
-/* Rounds */
-.rounds-row{display:flex;gap:.5rem;}
-.round-btn{flex:1;padding:.55rem;border-radius:8px;border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:var(--muted);background:var(--card);cursor:pointer;transition:all .18s;}
-.round-btn.active{border-color:var(--teal);color:var(--teal);background:rgba(0,201,167,.08);}
-
-/* New: Difficulty levels */
-.difficulty-row{display:flex;gap:.5rem;}
-.diff-btn{flex:1;padding:.55rem;border-radius:8px;border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:var(--muted);background:var(--card);cursor:pointer;transition:all .18s;}
-.diff-btn.active{border-color:var(--purple);color:var(--purple);background:rgba(162,155,254,.08);}
-
 .start-btn{width:100%;margin-top:1.5rem;padding:1rem;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.4rem;letter-spacing:.08em;text-transform:uppercase;background:var(--amber);color:var(--bg);border:none;border-radius:10px;cursor:pointer;transition:all .2s;}
 .start-btn:hover{background:var(--amber2);transform:translateY(-2px);box-shadow:0 8px 30px rgba(245,166,35,.3);}
 
-/* ══════════════════════════════════════════
-   GAME SCREEN (Enhanced with history log and AI opponents)
-══════════════════════════════════════════ */
+/* ══ GAME SCREEN ══ */
 #screen-game{flex-direction:row;height:100vh;overflow:hidden;}
-
-/* Sidebar */
 .sidebar{width:280px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
 .sidebar-top{padding:1.25rem 1.25rem .75rem;border-bottom:1px solid var(--border);}
 .game-logo{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem;letter-spacing:.05em;color:var(--amber);}
 .game-meta{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;color:var(--muted);margin-top:.2rem;}
-
-/* Round tracker */
 .round-tracker{padding:1rem 1.25rem;border-bottom:1px solid var(--border);}
 .rt-label{font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
 .rt-dots{display:flex;gap:.35rem;flex-wrap:wrap;}
 .rt-dot{width:22px;height:22px;border-radius:5px;border:1px solid var(--border2);font-family:'Share Tech Mono',monospace;font-size:.55rem;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all .2s;}
 .rt-dot.done{background:rgba(245,166,35,.15);border-color:var(--amber);color:var(--amber);}
 .rt-dot.current{background:var(--amber);color:var(--bg);font-weight:700;box-shadow:0 0 10px rgba(245,166,35,.4);}
-
-/* Scoreboard */
 .scoreboard{flex:1;padding:1rem 1.25rem;overflow-y:auto;}
 .sb-title{font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;}
 .team-score-card{margin-bottom:.75rem;border-radius:10px;padding:.9rem;border:1px solid var(--border);background:var(--card);transition:all .2s;}
@@ -172,36 +108,25 @@ body::after{
 .tsm-score{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.8rem;letter-spacing:-.02em;}
 .tsm-kpi-bars{display:flex;flex-direction:column;gap:.3rem;margin-top:.5rem;}
 .tsm-bar-row{display:flex;align-items:center;gap:.4rem;}
-.tsm-bar-label{font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--muted);width:55px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tsm-bar-label{font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--muted);width:55px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .tsm-bar-track{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
 .tsm-bar-fill{height:100%;border-radius:2px;transition:width .6s ease;}
 .tsm-bar-val{font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--muted);width:30px;text-align:right;flex-shrink:0;}
-
-/* Focus KPI badge */
-.focus-badge{margin:0 1.25rem 1rem;padding:.65rem 1rem;background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);border-radius:10px;}
+.focus-badge{margin:0 1.25rem 0;padding:.65rem 1rem;background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);border-radius:10px;}
 .fb-label{font-family:'Share Tech Mono',monospace;font-size:.52rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem;}
 .fb-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;color:var(--amber);line-height:1.2;}
-
-/* New: History log in sidebar */
-.history-log{padding:1rem 1.25rem;border-top:1px solid var(--border);flex-shrink:0;}
-.hl-title{font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
-.hl-entries{font-size:.75rem;color:var(--muted);max-height:150px;overflow-y:auto;}
-
-/* ── MAIN AREA ── */
+.history-log{padding:.75rem 1.25rem;border-top:1px solid var(--border);}
+.hl-title{font-family:'Share Tech Mono',monospace;font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;}
+.hl-entries{font-size:.72rem;color:var(--muted);max-height:120px;overflow-y:auto;line-height:1.6;}
+.hl-entries div{padding:.1rem 0;border-bottom:1px solid var(--border);}
 .main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-
-/* Header bar (Enhanced with theme toggle) */
 .game-header{padding:.85rem 1.5rem;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .gh-turn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;letter-spacing:.03em;}
-.gh-turn span{font-size:1.4rem;}
 .gh-phase{font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
-.gh-actions{display:flex;gap:.5rem;align-items:center;}
-.theme-toggle { cursor: pointer; font-size: 1rem; }
-
-/* Content area */
+.gh-actions{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;}
 .content-area{flex:1;overflow-y:auto;padding:1.5rem;}
 
-/* ── SCENARIO CARD ── */
+/* SCENARIO CARD */
 .scenario-card{background:var(--card);border:1px solid var(--border2);border-radius:14px;margin-bottom:1.25rem;overflow:hidden;}
 .sc-header{padding:1rem 1.5rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;background:linear-gradient(135deg,rgba(245,166,35,.08),transparent);border-bottom:1px solid var(--border);}
 .sc-cat{font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;padding:.25rem .65rem;border-radius:4px;background:rgba(245,166,35,.12);color:var(--amber);flex-shrink:0;}
@@ -213,16 +138,15 @@ body::after{
 .sip-chip{font-family:'Share Tech Mono',monospace;font-size:.55rem;padding:.2rem .55rem;border-radius:4px;}
 .sip-chip.affected{background:rgba(245,166,35,.1);color:var(--amber2);}
 .sip-chip.focus{background:rgba(245,166,35,.25);color:var(--amber);border:1px solid rgba(245,166,35,.4);}
-
-/* 4P Tags */
 .sc-4p{display:flex;gap:.3rem;flex-wrap:wrap;padding:.5rem 1.5rem;border-top:1px solid var(--border);}
 .sc-4p-tag{font-family:'Share Tech Mono',monospace;font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;padding:.12rem .5rem;border-radius:3px;}
 .tag-performance{background:rgba(245,166,35,.1);color:var(--amber);}
 .tag-process{background:rgba(0,201,167,.1);color:var(--teal);}
 .tag-practice{background:rgba(162,155,254,.1);color:var(--purple);}
 .tag-people{background:rgba(255,107,129,.1);color:var(--t4);}
+.sc-difficulty{font-family:'Share Tech Mono',monospace;font-size:.5rem;padding:.12rem .5rem;border-radius:3px;background:rgba(162,155,254,.1);color:var(--purple);}
 
-/* ── DECISION CARDS ── */
+/* DECISIONS */
 .decisions-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:.85rem;}
 .decisions-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.9rem;}
 .decision-card{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:1.25rem;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;}
@@ -240,13 +164,9 @@ body::after{
 .dc-impact.neg{background:rgba(255,71,87,.1);color:var(--red);}
 .dc-impact.neu{background:rgba(90,106,130,.1);color:var(--muted);}
 .decision-card.selected .dc-title{color:var(--amber);}
-
-/* Debrief box (shown in reveal) */
 .debrief-box{margin-top:.9rem;padding:.7rem .9rem;background:rgba(162,155,254,.05);border:1px solid rgba(162,155,254,.18);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;}
 .debrief-label{font-family:'Share Tech Mono',monospace;font-size:.48rem;letter-spacing:.2em;text-transform:uppercase;color:var(--purple);margin-bottom:.3rem;}
 .debrief-text{font-size:.75rem;color:#9a9fc8;line-height:1.65;}
-
-/* Systemic Insight panel (bottom of reveal) */
 .insight-panel{background:var(--card);border:1px solid var(--border2);border-radius:14px;border-left:4px solid var(--teal);padding:1.25rem 1.5rem;margin-top:1.25rem;}
 .ip-header{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;flex-wrap:wrap;}
 .ip-label{font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);}
@@ -254,63 +174,48 @@ body::after{
 .ip-text{font-size:.85rem;color:#a0b0c8;line-height:1.75;}
 .ip-4p{display:flex;gap:.35rem;margin-top:.65rem;flex-wrap:wrap;}
 
-/* ── CONFIRM BUTTON ── */
+/* CONFIRM BAR */
 .confirm-bar{flex-shrink:0;padding:1rem 1.5rem;background:var(--panel);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;}
 .cb-hint{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.08em;}
 .confirm-btn{padding:.75rem 2rem;border:none;border-radius:9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.2rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:var(--dim);color:var(--muted);transition:all .2s;}
 .confirm-btn.ready{background:var(--amber);color:var(--bg);box-shadow:0 4px 20px rgba(245,166,35,.3);}
 .confirm-btn.ready:hover{background:var(--amber2);transform:translateY(-1px);}
 
-/* ══════════════════════════════════════════
-   RESULTS SCREEN (Enhanced with charts)
-══════════════════════════════════════════ */
+/* ══ RESULTS ══ */
 #screen-results{align-items:center;justify-content:center;padding:2rem 1rem;min-height:100vh;}
-.results-wrap{width:100%;max-width:900px;}
+.results-wrap{width:100%;max-width:960px;}
 .results-header{text-align:center;margin-bottom:2.5rem;}
 .results-header .eyebrow{font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--amber);margin-bottom:.5rem;}
 .results-header h2{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:3rem;}
-
 .podium{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;}
 .podium-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:1.5rem;text-align:center;position:relative;overflow:hidden;}
 .podium-card.rank-1{border-color:var(--amber);background:linear-gradient(135deg,rgba(245,166,35,.12),var(--panel));}
-.podium-card.rank-2{border-color:rgba(255,255,255,.15);}
-.podium-card.rank-3{border-color:rgba(255,255,255,.08);}
 .podium-rank{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:3.5rem;line-height:1;opacity:.12;position:absolute;top:.5rem;right:.75rem;}
 .podium-medal{font-size:2rem;margin-bottom:.5rem;}
 .podium-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.2rem;margin-bottom:.3rem;}
 .podium-score{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:2.5rem;}
 .podium-score-label{font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;}
-
+.chart-wrap{position:relative; height:220px; margin-bottom:1.5rem; background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:1.25rem;}
+.chart-title{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;}
 .kpi-final-table{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.5rem;}
 .kft-head{display:grid;padding:.75rem 1.25rem;background:var(--card);border-bottom:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
-.kft-row{display:grid;padding:.65rem 1.25rem;border-bottom:1px solid var(--border);font-size:.85rem;align-items:center;transition:background .15s;}
-.kft-row:hover{background:rgba(255,255,255,.02);}
+.kft-row{display:grid;padding:.65rem 1.25rem;border-bottom:1px solid var(--border);font-size:.85rem;align-items:center;}
 .kft-row:last-child{border-bottom:none;}
 .kft-kpi{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--amber2);}
 .kft-val-good{color:var(--green);}
 .kft-val-bad{color:var(--red);}
-.kft-val-neu{color:var(--text);}
-
 .result-actions{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;}
 
-/* New: KPI Evolution Charts */
-.chart-wrap{margin-bottom:1.5rem;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:1rem;}
-.chart-title{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;}
-
-/* ══════════════════════════════════════════
-   EDITOR SCREEN (Enhanced with preview and import/export)
-══════════════════════════════════════════ */
-#screen-editor{padding:2rem 1rem;}
+/* ══ EDITOR ══ */
+#screen-editor{padding:2rem 1rem;min-height:100vh;}
 .editor-wrap{max-width:900px;margin:0 auto;}
-.ed-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;}
+.ed-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:.5rem;}
 .ed-header h2{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:2rem;}
-.ed-tabs{display:flex;gap:.4rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:.75rem;}
+.ed-tabs{display:flex;gap:.4rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:.75rem;flex-wrap:wrap;}
 .ed-tab{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:.4rem .85rem;border-radius:7px;border:1px solid transparent;color:var(--muted);background:none;cursor:pointer;transition:all .18s;}
 .ed-tab.active{border-color:var(--amber);color:var(--amber);background:rgba(245,166,35,.08);}
 .ed-panel{display:none;}
 .ed-panel.active{display:block;}
-
-/* Scenario list */
 .scenario-list{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.25rem;}
 .sl-item{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;display:flex;align-items:flex-start;gap:.9rem;}
 .sl-num{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);width:28px;flex-shrink:0;margin-top:.1rem;}
@@ -324,8 +229,6 @@ body::after{
 .sl-nexaflow-tag{font-family:'Share Tech Mono',monospace;font-size:.5rem;padding:.12rem .45rem;border-radius:3px;background:rgba(162,155,254,.15);color:var(--purple);}
 .sl-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;flex-shrink:0;transition:color .15s;}
 .sl-del:hover{color:var(--red);}
-
-/* Editor form */
 .ed-form{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.25rem;}
 .ed-form h4{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.04em;text-transform:uppercase;color:var(--amber);margin-bottom:1.1rem;border-bottom:1px solid var(--border);padding-bottom:.5rem;}
 .ef-field{margin-bottom:.9rem;}
@@ -336,48 +239,35 @@ body::after{
 .ef-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
 .ef-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;}
 @media(max-width:550px){.ef-grid,.ef-grid-3{grid-template-columns:1fr;}}
-
-/* Decision editor inside scenario */
 .decision-editor{border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.75rem;background:var(--card);}
 .de-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;}
 .de-letter{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.4rem;color:var(--amber);}
 
-/* New: Preview button in editor */
-.preview-wrap { margin-top: 1rem; background: var(--card); padding: 1rem; border-radius: 10px; }
+/* MODAL */
+.modal{display:none;position:fixed;z-index:10000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.6);}
+.modal-content{background:var(--panel);margin:10% auto;padding:1.5rem;border:1px solid var(--border);width:90%;max-width:560px;border-radius:12px;}
+.modal-content h4{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--amber);margin-bottom:1rem;font-size:1.1rem;letter-spacing:.05em;text-transform:uppercase;}
+.modal-close{float:right;font-size:1.4rem;color:var(--muted);cursor:pointer;line-height:1;}
+.modal-close:hover{color:var(--red);}
+.modal-actions{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap;}
 
-/* ══════════════════════════════════════════
-   SHARED COMPONENTS (Enhanced with modals)
-══════════════════════════════════════════ */
+/* SHARED BUTTONS */
 .btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;letter-spacing:.05em;text-transform:uppercase;padding:.6rem 1.4rem;border-radius:8px;border:1px solid var(--border2);color:var(--muted);background:var(--card);cursor:pointer;transition:all .18s;}
 .btn:hover{border-color:var(--muted);color:var(--text);}
+.btn-sm{font-size:.75rem;padding:.4rem .9rem;}
 .btn-amber{border-color:var(--amber);color:var(--amber);background:rgba(245,166,35,.08);}
 .btn-amber:hover{background:var(--amber);color:var(--bg);}
-.btn-red{border-color:var(--red);color:var(--red);background:rgba(255,71,87,.08);}
-.btn-red:hover{background:var(--red);color:#fff;}
 .btn-teal{border-color:var(--teal);color:var(--teal);background:rgba(0,201,167,.08);}
 .btn-teal:hover{background:var(--teal);color:var(--bg);}
+.btn-purple{border-color:var(--purple);color:var(--purple);background:rgba(162,155,254,.08);}
+.btn-purple:hover{background:var(--purple);color:var(--bg);}
+.btn-red{border-color:var(--red);color:var(--red);background:rgba(255,71,87,.08);}
+.btn-red:hover{background:var(--red);color:#fff;}
 
-/* Toast */
+/* TOAST */
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9900;background:var(--panel);border:1px solid var(--amber);border-radius:10px;padding:.7rem 1.2rem;font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.08em;color:var(--amber);opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;max-width:300px;}
 .toast.show{opacity:1;transform:none;}
-
-/* Pulse animation */
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
-.pulse{animation:pulse 1.5s ease-in-out infinite;}
-
-/* Impact flash */
-@keyframes flashGreen{0%{background:rgba(46,213,115,.2);}100%{background:transparent;}}
-@keyframes flashRed{0%{background:rgba(255,71,87,.2);}100%{background:transparent;}}
-.flash-green{animation:flashGreen .8s ease;}
-.flash-red{animation:flashRed .8s ease;}
-
-/* New: Modal for import/export */
-.modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
-.modal-content { background-color: var(--panel); margin: 15% auto; padding: 20px; border: 1px solid var(--border); width: 80%; max-width: 500px; border-radius: 10px; }
-.close { color: var(--muted); float: right; font-size: 28px; font-weight: bold; }
-.close:hover { color: var(--red); cursor: pointer; }
-
-/* Responsive sidebar collapse */
 @media(max-width:700px){
   #screen-game{flex-direction:column;}
   .sidebar{width:100%;max-height:220px;flex-direction:row;flex-wrap:wrap;}
@@ -387,67 +277,40 @@ body::after{
 </head>
 <body>
 
-<!-- ════════════════════════════════════════
-     SCREEN: SETUP (Enhanced)
-════════════════════════════════════════ -->
+<!-- SETUP SCREEN -->
 <div class="screen active" id="screen-setup">
   <div class="setup-logo">
     <div class="eyebrow">Supply Chain Operations Reference · DS Edition</div>
-    <h1>SCOR<br><span>Command v3</span></h1>
-    <p>An enhanced competitive KPI simulation grounded in the SCOR-DS framework. Make decisions, navigate trade-offs, and explore advanced analytics. Now with AI opponents, difficulty levels, and more!</p>
-    <div class="scor-map">
-      <div class="scor-step highlight">Orchestrate</div>
-      <div class="scor-step">→</div>
-      <div class="scor-step highlight">Source</div>
-      <div class="scor-step">→</div>
-      <div class="scor-step highlight">Transform</div>
-      <div class="scor-step">→</div>
-      <div class="scor-step highlight">Order</div>
-      <div class="scor-step">→</div>
-      <div class="scor-step highlight">Fulfill</div>
-      <div class="scor-step">→</div>
-      <div class="scor-step highlight">Return</div>
-      <div class="scor-step">→</div>
-      <div class="scor-step highlight">Enable</div>
+    <h1>SCOR<br><span>Command</span></h1>
+    <p id="setup-tagline">A competitive KPI simulation grounded in SCOR-DS. Make decisions. Navigate trade-offs. Prove that global performance demands local sacrifice.</p>
+    <div class="setup-toolbar">
+      <button class="btn btn-sm" onclick="toggleTheme()">🌙 / ☀️</button>
+      <button class="btn btn-sm" onclick="toggleLanguage()" id="langBtn">🇫🇷 Français</button>
     </div>
+    <div class="scor-map" id="scorMap"></div>
   </div>
-
   <div class="setup-card">
     <div class="setup-section">
-      <h3>🎯 Select Focus KPI <span style="font-size:.7rem;font-weight:400;color:var(--muted);">(drives double scoring this session)</span></h3>
+      <h3 id="h-focusKpi">🎯 Select Focus KPI <span id="focusKpiHint" style="font-size:.7rem;font-weight:400;color:var(--muted);"></span></h3>
       <div id="kpiPicker"></div>
     </div>
-
     <div class="setup-section">
-      <h3>👥 Number of Teams</h3>
+      <h3 id="h-teams">👥 Number of Teams</h3>
       <div class="team-count-row">
         <button class="tc-btn" onclick="setTeamCount(1)">1</button>
         <button class="tc-btn active" onclick="setTeamCount(2)">2</button>
         <button class="tc-btn" onclick="setTeamCount(3)">3</button>
         <button class="tc-btn" onclick="setTeamCount(4)">4</button>
       </div>
-      <div class="team-inputs" id="teamInputs">
-        <div class="team-input-wrap show" id="twrap-0">
-          <div class="team-label"><span class="team-dot" style="background:var(--t1)"></span>Team 1</div>
-          <input class="team-name-input" id="tname-0" value="Alpha" maxlength="20">
-        </div>
-        <div class="team-input-wrap show" id="twrap-1">
-          <div class="team-label"><span class="team-dot" style="background:var(--t2)"></span>Team 2</div>
-          <input class="team-name-input" id="tname-1" value="Bravo" maxlength="20">
-        </div>
-        <div class="team-input-wrap" id="twrap-2">
-          <div class="team-label"><span class="team-dot" style="background:var(--t3)"></span>Team 3</div>
-          <input class="team-name-input" id="tname-2" value="Charlie" maxlength="20">
-        </div>
-        <div class="team-input-wrap" id="twrap-3">
-          <div class="team-label"><span class="team-dot" style="background:var(--t4)"></span>Team 4</div>
-          <input class="team-name-input" id="tname-3" value="Delta" maxlength="20">
-        </div>
+      <div class="team-inputs">
+        <div class="team-input-wrap show" id="twrap-0"><div class="team-label"><span class="team-dot" style="background:var(--t1)"></span>Team 1</div><input class="team-name-input" id="tname-0" value="Alpha" maxlength="20"></div>
+        <div class="team-input-wrap show" id="twrap-1"><div class="team-label"><span class="team-dot" style="background:var(--t2)"></span>Team 2</div><input class="team-name-input" id="tname-1" value="Bravo" maxlength="20"></div>
+        <div class="team-input-wrap" id="twrap-2"><div class="team-label"><span class="team-dot" style="background:var(--t3)"></span>Team 3</div><input class="team-name-input" id="tname-2" value="Charlie" maxlength="20"></div>
+        <div class="team-input-wrap" id="twrap-3"><div class="team-label"><span class="team-dot" style="background:var(--t4)"></span>Team 4</div><input class="team-name-input" id="tname-3" value="Delta" maxlength="20"></div>
       </div>
     </div>
-
     <div class="setup-section">
-      <h3>🔄 Number of Rounds</h3>
+      <h3 id="h-rounds">🔄 Number of Rounds</h3>
       <div class="rounds-row">
         <button class="round-btn" onclick="setRounds(3,this)">3</button>
         <button class="round-btn active" onclick="setRounds(5,this)">5</button>
@@ -455,54 +318,45 @@ body::after{
         <button class="round-btn" onclick="setRounds(10,this)">10</button>
       </div>
     </div>
-
     <div class="setup-section">
-      <h3>🛡️ Difficulty Level</h3>
+      <h3 id="h-difficulty">🛡️ Difficulty Level</h3>
       <div class="difficulty-row">
-        <button class="diff-btn active" onclick="setDifficulty('easy',this)">Easy</button>
-        <button class="diff-btn" onclick="setDifficulty('medium',this)">Medium</button>
-        <button class="diff-btn" onclick="setDifficulty('hard',this)">Hard</button>
+        <button class="diff-btn active" onclick="setDifficulty('easy',this)" id="diff-easy">Easy</button>
+        <button class="diff-btn" onclick="setDifficulty('medium',this)" id="diff-medium">Medium</button>
+        <button class="diff-btn" onclick="setDifficulty('hard',this)" id="diff-hard">Hard</button>
       </div>
     </div>
-
-    <button class="start-btn" onclick="startGame()">Launch Simulation →</button>
-    <div style="text-align:center;margin-top:.75rem;">
-      <button class="btn" onclick="showScreen('editor')" style="font-size:.75rem;">✏️ Edit Scenarios & KPIs</button>
+    <button class="start-btn" id="startBtn" onclick="startGame()">Launch Simulation →</button>
+    <div style="text-align:center;margin-top:.75rem;display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-sm" onclick="showScreen('editor')">✏️ <span id="editBtn-label">Edit Scenarios & KPIs</span></button>
     </div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════
-     SCREEN: GAME (Enhanced)
-════════════════════════════════════════ -->
+<!-- GAME SCREEN -->
 <div class="screen" id="screen-game">
   <div class="sidebar">
     <div class="sidebar-top">
-      <div class="game-logo">⬡ SCOR Command v3</div>
-      <div class="game-meta" id="gameMeta">Round 1 · Team Alpha's Turn</div>
+      <div class="game-logo">⬡ SCOR Command</div>
+      <div class="game-meta" id="gameMeta">—</div>
     </div>
-
     <div class="round-tracker">
-      <div class="rt-label">Progress</div>
+      <div class="rt-label" id="lb-progress">Progress</div>
       <div class="rt-dots" id="roundDots"></div>
     </div>
-
-    <div class="focus-badge">
-      <div class="fb-label">Focus KPI (×2 pts)</div>
+    <div class="focus-badge" style="margin:0 1.25rem 1rem;">
+      <div class="fb-label" id="lb-focusKpiPts">Focus KPI (×2 pts)</div>
       <div class="fb-name" id="focusKpiName">—</div>
     </div>
-
     <div class="scoreboard">
-      <div class="sb-title">Live Scoreboard</div>
+      <div class="sb-title" id="lb-liveSb">Live Scoreboard</div>
       <div id="scoreboard"></div>
     </div>
-
     <div class="history-log">
-      <div class="hl-title">Round History</div>
+      <div class="hl-title" id="lb-roundHistory">Round History</div>
       <div id="historyEntries" class="hl-entries"></div>
     </div>
   </div>
-
   <div class="main-area">
     <div class="game-header">
       <div>
@@ -510,15 +364,14 @@ body::after{
         <div class="gh-turn" id="ghTurn">—</div>
       </div>
       <div class="gh-actions">
-        <span class="theme-toggle" onclick="toggleTheme()">🌙/☀️</span>
-        <button class="btn" onclick="showScreen('setup')" style="font-size:.7rem;">⬅ Exit</button>
-        <button class="btn" onclick="saveGameState()" style="font-size:.7rem;">Save Game</button>
-        <button class="btn" onclick="loadGameState()" style="font-size:.7rem;">Load Game</button>
+        <button class="btn btn-sm" onclick="toggleTheme()">🌙/☀️</button>
+        <button class="btn btn-sm" onclick="toggleLanguage()" id="gameLangBtn">🇫🇷</button>
+        <button class="btn btn-sm" onclick="saveGameState()" id="lb-save">💾 Save</button>
+        <button class="btn btn-sm" onclick="loadGameState()" id="lb-load">📂 Load</button>
+        <button class="btn btn-sm" onclick="showScreen('setup')">⬅ Exit</button>
       </div>
     </div>
-
     <div class="content-area" id="contentArea"></div>
-
     <div class="confirm-bar">
       <div class="cb-hint" id="cbHint">SELECT A DECISION TO CONTINUE</div>
       <button class="confirm-btn" id="confirmBtn" onclick="confirmDecision()" disabled>Confirm Decision</button>
@@ -526,125 +379,75 @@ body::after{
   </div>
 </div>
 
-<!-- ════════════════════════════════════════
-     SCREEN: RESULTS (Enhanced with charts)
-════════════════════════════════════════ -->
+<!-- RESULTS SCREEN -->
 <div class="screen" id="screen-results">
   <div class="results-wrap">
     <div class="results-header">
-      <div class="eyebrow">Simulation Complete</div>
-      <h2>Final <span style="color:var(--amber)">Standings</span></h2>
+      <div class="eyebrow" id="lb-simComplete">Simulation Complete</div>
+      <h2 id="lb-finalStandings">Final <span style="color:var(--amber)">Standings</span></h2>
     </div>
     <div class="podium" id="podium"></div>
     <div class="chart-wrap">
-      <div class="chart-title">Score Evolution</div>
-      <canvas id="scoreChart" height="200"></canvas>
+      <div class="chart-title" id="lb-scoreEvo">Score Evolution</div>
+      <div style="position:relative; height:160px; width:100%;">
+        <canvas id="scoreChart"></canvas>
+      </div>
     </div>
     <div class="chart-wrap">
-      <div class="chart-title">Focus KPI Evolution</div>
-      <canvas id="focusKpiChart" height="200"></canvas>
+      <div class="chart-title" id="lb-focusKpiEvo">Focus KPI Evolution</div>
+      <div style="position:relative; height:160px; width:100%;">
+        <canvas id="focusKpiChart"></canvas>
+      </div>
     </div>
     <div class="kpi-final-table" id="kpiFinalTable"></div>
     <div class="result-actions">
-      <button class="btn btn-amber" onclick="showScreen('setup')">New Game</button>
-      <button class="btn btn-teal" onclick="restartSameGame()">Replay Same Setup</button>
-      <button class="btn" onclick="showScreen('editor')">✏️ Edit Game</button>
-      <button class="btn btn-purple" onclick="exportGameData()">Export Game Data</button>
+      <button class="btn btn-amber" onclick="showScreen('setup')" id="lb-newGame">New Game</button>
+      <button class="btn btn-teal" onclick="restartSameGame()" id="lb-replay">Replay Same Setup</button>
+      <button class="btn" onclick="showScreen('editor')" id="lb-editGame">✏️ Edit Game</button>
+      <button class="btn btn-purple" onclick="exportGameData()" id="lb-exportGame">Export Game Data</button>
     </div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════
-     SCREEN: EDITOR (Enhanced)
-════════════════════════════════════════ -->
+<!-- EDITOR SCREEN -->
 <div class="screen" id="screen-editor">
   <div class="editor-wrap">
     <div class="ed-header">
-      <h2>Game <span style="color:var(--amber)">Editor v3</span></h2>
-      <button class="btn btn-amber" onclick="showScreen('setup')">← Back to Setup</button>
+      <h2>Game <span style="color:var(--amber)" id="lb-editorTitle">Editor v3</span></h2>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <button class="btn btn-sm" onclick="toggleLanguage()">EN/FR</button>
+        <button class="btn btn-sm btn-amber" onclick="showScreen('setup')">← Back to Setup</button>
+      </div>
     </div>
-
     <div class="ed-tabs">
-      <button class="ed-tab active" onclick="edTab('scenarios',this)">📋 Scenarios</button>
-      <button class="ed-tab" onclick="edTab('kpis',this)">📊 KPI Library</button>
-      <button class="ed-tab" onclick="edTab('rules',this)">📖 How to Play</button>
-      <button class="ed-tab" onclick="edTab('importexport',this)">🔄 Import/Export</button>
+      <button class="ed-tab active" onclick="edTab('scenarios',this)" id="tab-scenarios">📋 Scenarios</button>
+      <button class="ed-tab" onclick="edTab('kpis',this)" id="tab-kpis">📊 KPI Library</button>
+      <button class="ed-tab" onclick="edTab('rules',this)" id="tab-rules">📖 How to Play</button>
+      <button class="ed-tab" onclick="edTab('importexport',this)" id="tab-ie">🔄 Import/Export</button>
     </div>
 
     <!-- SCENARIOS PANEL -->
     <div class="ed-panel active" id="edPanel-scenarios">
       <div class="scenario-list" id="edScenarioList"></div>
-      <div class="ed-form" id="edScenarioForm">
+      <div class="ed-form">
         <h4>➕ Add New Scenario</h4>
         <div class="ef-grid">
-          <div class="ef-field">
-            <label class="ef-label">Title</label>
-            <input class="ef-input" id="newScTitle" placeholder="Port Strike Disruption">
-          </div>
-          <div class="ef-field">
-            <label class="ef-label">Category</label>
-            <select class="ef-select" id="newScCat">
-              <option>Disruption</option><option>Opportunity</option>
-              <option>Compliance</option><option>Technology</option>
-              <option>Market Shift</option><option>Sustainability</option>
-              <option>Systemic</option>
-            </select>
-          </div>
+          <div class="ef-field"><label class="ef-label">Title</label><input class="ef-input" id="newScTitle" placeholder="Port Strike Disruption"></div>
+          <div class="ef-field"><label class="ef-label">Category</label><select class="ef-select" id="newScCat"><option>Disruption</option><option>Opportunity</option><option>Compliance</option><option>Technology</option><option>Market Shift</option><option>Sustainability</option><option>Systemic</option></select></div>
         </div>
         <div class="ef-grid">
-          <div class="ef-field">
-            <label class="ef-label">SCOR-DS Process Domain</label>
-            <select class="ef-select" id="newScProcess">
-              <option>Orchestrate</option>
-              <option>Source</option>
-              <option>Transform</option>
-              <option>Order</option>
-              <option>Fulfill</option>
-              <option>Return</option>
-              <option>Enable</option>
-              <option>Orchestrate → Source</option>
-              <option>Orchestrate → Fulfill</option>
-              <option>Source → Transform</option>
-              <option>Fulfill → Return</option>
-              <option>Source → Enable</option>
-              <option>Orchestrate → Enable</option>
-              <option>Cross-domain</option>
-            </select>
-          </div>
-          <div class="ef-field">
-            <label class="ef-label">4P Tags (comma separated)</label>
-            <input class="ef-input" id="newSc4P" placeholder="Performance, Process">
-          </div>
+          <div class="ef-field"><label class="ef-label">SCOR-DS Process Domain</label><select class="ef-select" id="newScProcess"><option>Orchestrate</option><option>Source</option><option>Transform</option><option>Order</option><option>Fulfill</option><option>Return</option><option>Enable</option><option>Orchestrate → Source</option><option>Orchestrate → Fulfill</option><option>Source → Transform</option><option>Fulfill → Return</option><option>Source → Enable</option><option>Orchestrate → Enable</option><option>Cross-domain</option></select></div>
+          <div class="ef-field"><label class="ef-label">4P Tags (comma separated)</label><input class="ef-input" id="newSc4P" placeholder="Performance, Process"></div>
         </div>
-        <div class="ef-field">
-          <label class="ef-label">Scenario Description</label>
-          <textarea class="ef-textarea" id="newScDesc" placeholder="Describe the supply chain situation teams will face..."></textarea>
+        <div class="ef-field"><label class="ef-label">Scenario Description</label><textarea class="ef-textarea" id="newScDesc" placeholder="Describe the supply chain situation..."></textarea></div>
+        <div class="ef-field"><label class="ef-label">Systemic Insight (facilitator debrief)</label><textarea class="ef-textarea" id="newScInsight" placeholder="SCOR-DS concept this scenario illustrates..."></textarea></div>
+        <div class="ef-field"><label class="ef-label">Affected KPIs (comma separated)</label><input class="ef-input" id="newScKpis" placeholder="RL.1.1, RS.1.1, CO.1.1"></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);margin:.9rem 0 .6rem;border-top:1px solid var(--border);padding-top:.75rem;">Decisions (min 2, max 4)</div>
+        <div id="newScDecisions"></div>
+        <div style="display:flex;gap:.5rem;margin-top:.5rem;">
+          <button class="btn btn-sm btn-teal" onclick="addDecisionEditor()">+ Add Decision</button>
+          <button class="btn btn-sm btn-amber" onclick="saveScenario()">Save Scenario</button>
         </div>
-        <div class="ef-field">
-          <label class="ef-label">Systemic Insight (facilitator debrief — shown after reveal)</label>
-          <textarea class="ef-textarea" id="newScInsight" placeholder="SCOR-DS concept this scenario illustrates..."></textarea>
-        </div>
-        <div class="ef-field">
-          <label class="ef-label">Affected KPIs (comma separated, e.g. RL.1.1, RS.1.1)</label>
-          <input class="ef-input" id="newScKpis" placeholder="RL.1.1, RS.1.1, CO.1.1">
-        </div>
-
-        <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);margin:.9rem 0 .6rem;border-top:1px solid var(--border);padding-top:.75rem;">
-          Decisions (A, B, C, D — minimum 2, maximum 4)
-        </div>
-        <div id="newScDecisions">
-          <div class="decision-editor"><div class="de-header"><span class="de-letter">A</span><button class="sl-del" onclick="removeDecision(this)">✕</button></div>
-            <div class="ef-field"><label class="ef-label">Title</label><input class="ef-input dec-title" placeholder="Activate backup suppliers"></div>
-            <div class="ef-field"><label class="ef-label">Description</label><textarea class="ef-textarea dec-desc" placeholder="Detailed description..."></textarea></div>
-            <div class="ef-field"><label class="ef-label">KPI Impacts (code:delta, e.g. RL.1.1:+8, RS.1.1:-3)</label><input class="ef-input dec-impacts" placeholder="RL.1.1:+8,RS.1.1:-3"></div>
-            <div class="ef-field"><label class="ef-label">SCOR-DS Debrief (shown after team picks this option)</label><textarea class="ef-textarea dec-debrief" placeholder="What SCOR-DS concept does this decision illustrate?"></textarea></div>
-          </div>
-          <!-- More decision editors added dynamically -->
-        </div>
-        <button class="btn" onclick="addDecisionEditor()" style="margin-bottom:.75rem;">+ Add Decision</button>
-        <button class="btn btn-amber" onclick="saveScenario()" style="margin-top:.75rem;">Save Scenario</button>
-        <button class="btn btn-teal" onclick="previewScenario()" style="margin-top:.75rem;">Preview</button>
-        <div id="scenarioPreview" class="preview-wrap" style="display:none;"></div>
       </div>
     </div>
 
@@ -657,26 +460,20 @@ body::after{
           <h4 style="margin-bottom:.75rem;">➕ Add Custom KPI</h4>
           <div class="ef-grid-3">
             <div class="ef-field"><label class="ef-label">Code</label><input class="ef-input" id="newKpiCode" placeholder="AG.1.3"></div>
-            <div class="ef-field"><label class="ef-label">Name</label><input class="ef-input" id="newKpiName" placeholder="Inventory Accuracy"></div>
-            <div class="ef-field"><label class="ef-label">Category</label>
-              <select class="ef-select" id="newKpiCat">
-                <option value="RL">RL — Reliability</option>
-                <option value="RS">RS — Responsiveness</option>
-                <option value="AG">AG — Agility</option>
-                <option value="CO">CO — Cost</option>
-                <option value="AM">AM — Asset Management</option>
-              </select>
-            </div>
+            <div class="ef-field"><label class="ef-label">Name</label><input class="ef-input" id="newKpiName" placeholder="Forecast Accuracy"></div>
+            <div class="ef-field"><label class="ef-label">Category</label><select class="ef-select" id="newKpiCat"><option value="RL">RL — Reliability</option><option value="RS">RS — Responsiveness</option><option value="AG">AG — Agility</option><option value="CO">CO — Cost</option><option value="AM">AM — Asset Management</option></select></div>
           </div>
-          <div class="ef-field"><label class="ef-label">Description</label><input class="ef-input" id="newKpiDesc" placeholder="Brief one-line description"></div>
-          <div class="ef-grid">
+          <div class="ef-field"><label class="ef-label">Description</label><input class="ef-input" id="newKpiDesc" placeholder="Brief description"></div>
+          <div class="ef-grid-3">
             <div class="ef-field"><label class="ef-label">Unit</label><select class="ef-select" id="newKpiUnit"><option>%</option><option>days</option><option>% rev</option><option>ratio</option></select></div>
             <div class="ef-field"><label class="ef-label">Higher is Better?</label><select class="ef-select" id="newKpiDir"><option value="1">Yes (↑ good)</option><option value="-1">No (↓ good)</option></select></div>
-            <div class="ef-field"><label class="ef-label">Baseline</label><input class="ef-input" id="newKpiBaseline" type="number" value="80"></div>
-            <div class="ef-field"><label class="ef-label">Min</label><input class="ef-input" id="newKpiMin" type="number" value="0"></div>
-            <div class="ef-field"><label class="ef-label">Max</label><input class="ef-input" id="newKpiMax" type="number" value="100"></div>
+            <div class="ef-field"><label class="ef-label">Baseline</label><input class="ef-input" id="newKpiBaseline" type="number" placeholder="80"></div>
           </div>
-          <button class="btn btn-amber" onclick="addCustomKpi()">Add KPI</button>
+          <div class="ef-grid">
+            <div class="ef-field"><label class="ef-label">Min</label><input class="ef-input" id="newKpiMin" type="number" placeholder="0"></div>
+            <div class="ef-field"><label class="ef-label">Max</label><input class="ef-input" id="newKpiMax" type="number" placeholder="100"></div>
+          </div>
+          <button class="btn btn-sm btn-amber" onclick="addCustomKpi()">Add KPI</button>
         </div>
       </div>
     </div>
@@ -684,54 +481,43 @@ body::after{
     <!-- HOW TO PLAY PANEL -->
     <div class="ed-panel" id="edPanel-rules">
       <div class="ed-form">
-        <h4>📖 How to Play — SCOR Command v3</h4>
+        <h4>📖 How to Play</h4>
         <div style="font-size:.88rem;color:#a0b0c8;line-height:1.85;">
-
-          <div style="background:rgba(0,201,167,.06);border:1px solid rgba(0,201,167,.2);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;">
+          <div style="background:rgba(0,201,167,.06);border:1px solid rgba(0,201,167,.2);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;">
             <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--teal);font-size:1rem;margin-bottom:.5rem;">The SCOR-DS Framework</div>
-            SCOR-DS (Supply Chain Operations Reference — Digital Standard) defines supply chain performance across <strong style="color:var(--text)">5 attributes</strong>: <span style="color:var(--amber)">Reliability (RL)</span>, <span style="color:var(--teal)">Responsiveness (RS)</span>, <span style="color:var(--purple)">Agility (AG)</span>, <span style="color:var(--t4)">Cost (CO)</span>, and <span style="color:var(--green)">Asset Management (AM)</span>.
-            <br><br>
-            It organizes supply chain activity into <strong style="color:var(--text)">7 macro-processes</strong>: <strong>Orchestrate → Source → Transform → Order → Fulfill → Return → Enable</strong>. Every scenario in this simulation is tagged to one or more of these domains.
-            <br><br>
-            The <strong style="color:var(--text)">4P Framework</strong> — Performance, Process, Practice, People — is the lens through which each scenario is analyzed. Watch the 4P tags on each scenario card.
+            SCOR-DS defines supply chain performance across <strong style="color:var(--text)">5 attributes</strong>: <span style="color:var(--amber)">Reliability (RL)</span>, <span style="color:var(--teal)">Responsiveness (RS)</span>, <span style="color:var(--purple)">Agility (AG)</span>, <span style="color:var(--t4)">Cost (CO)</span>, <span style="color:var(--green)">Asset Management (AM)</span>. It organizes activity into <strong style="color:var(--text)">7 macro-processes</strong>: Orchestrate → Source → Transform → Order → Fulfill → Return → Enable. The <strong style="color:var(--text)">4P Framework</strong> (Performance, Process, Practice, People) is the lens for analysis.
           </div>
-
-          <div style="background:var(--card);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:.85rem;">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--amber);font-size:1rem;margin-bottom:.35rem;">① Setup</div>
-            Choose a <strong style="color:var(--text)">Focus KPI</strong> — impacts on this KPI score double points. Set team count (1–4) and names. Choose rounds. Select difficulty (Easy: milder impacts; Hard: amplified trade-offs). Scenarios are drawn randomly from the full library without immediate repetition. For single team, AI opponents can be enabled.
+          <div style="background:var(--card);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:.75rem;">
+            <strong style="color:var(--amber);">① Setup</strong> — Choose a Focus KPI (double points). Set teams, rounds, and difficulty. Difficulty scales KPI impact magnitudes at scoring time: Easy ×0.8, Medium ×1.0, Hard ×1.2.
           </div>
-          <div style="background:var(--card);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:.85rem;">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--teal);font-size:1rem;margin-bottom:.35rem;">② Each Round</div>
-            A <strong style="color:var(--text)">scenario card</strong> presents a real supply chain situation tagged to its SCOR-DS process domain. Each team reads the same scenario and selects one of 3–4 strategic decisions simultaneously (blind). Decisions are then revealed one by one. AI teams make smart decisions based on difficulty.
+          <div style="background:var(--card);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:.75rem;">
+            <strong style="color:var(--teal);">② Each Round</strong> — A scenario tagged to its SCOR-DS process domain is presented. Teams choose a decision simultaneously (blind). Then all decisions are revealed.
           </div>
-          <div style="background:var(--card);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:.85rem;">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--purple);font-size:1rem;margin-bottom:.35rem;">③ Reveal & Debrief</div>
-            After all decisions are revealed, each team sees a <strong style="color:var(--text)">SCOR-DS Insight</strong> explaining what concept their decision illustrates. A <strong style="color:var(--text)">Systemic Insight</strong> panel at the bottom connects the scenario to the broader NexaFlow-type paradox. This is the core learning moment — use it for facilitated discussion. History log tracks all rounds.
-          </div>
-          <div style="background:var(--card);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:.85rem;">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--green);font-size:1rem;margin-bottom:.35rem;">④ Scoring</div>
-            Each decision impacts specific KPIs by ±points. The Focus KPI counts <strong style="color:var(--text)">double</strong>. KPI values are bounded — they cannot exceed their realistic min/max range. The cost attribute (CO) and cycle time (RS, AM) are inverted: lower = better, so improvements score positive. Difficulty modifies impact magnitude.
+          <div style="background:var(--card);border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin-bottom:.75rem;">
+            <strong style="color:var(--purple);">③ Reveal & Debrief</strong> — Each decision reveals a SCOR-DS Insight. A Systemic Insight panel connects the scenario to the NexaFlow-type paradox. This is the core learning moment.
           </div>
           <div style="background:var(--card);border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:1rem 1.25rem;">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--red);font-size:1rem;margin-bottom:.35rem;">⑤ The Core Paradox</div>
-            Several NexaFlow scenarios explore the central supply chain tension: <strong style="color:var(--text)">local KPI targets destroy global performance</strong>. Purchasing hitting cost targets → Bullwhip. OEE targets in Transform → dock saturation. Watch for scenarios where the "green" decision locally scores red globally. That's the lesson.
+            <strong style="color:var(--red);">④ The Core Paradox</strong> — NexaFlow scenarios show that <strong style="color:var(--text)">local KPI optimization destroys global performance</strong>. Watch for decisions that score green locally but red at the system level.
           </div>
         </div>
       </div>
     </div>
 
-    <!-- New: Import/Export Panel -->
+    <!-- IMPORT/EXPORT PANEL -->
     <div class="ed-panel" id="edPanel-importexport">
       <div class="ed-form">
-        <h4>🔄 Import/Export Data</h4>
+        <h4>🔄 Import / Export</h4>
         <div class="ef-field">
-          <label class="ef-label">Export Scenarios & KPIs</label>
-          <button class="btn btn-amber" onclick="exportData()">Export to JSON</button>
+          <label class="ef-label">Export Scenarios & KPIs to JSON</label>
+          <button class="btn btn-sm btn-amber" onclick="exportData()">Export to JSON</button>
         </div>
-        <div class="ef-field">
-          <label class="ef-label">Import Scenarios & KPIs</label>
-          <input type="file" id="importFile" accept=".json">
-          <button class="btn btn-teal" onclick="importData()">Import from JSON</button>
+        <div class="ef-field" style="margin-top:1rem;border-top:1px solid var(--border);padding-top:1rem;">
+          <label class="ef-label">Import Scenarios & KPIs from JSON</label>
+          <input type="file" id="importFile" accept=".json" style="margin-bottom:.5rem;color:var(--muted);font-size:.85rem;">
+          <button class="btn btn-sm btn-teal" onclick="importData()">Import from JSON</button>
+        </div>
+        <div style="margin-top:1rem;border-top:1px solid var(--border);padding-top:1rem;font-size:.8rem;color:var(--muted);line-height:1.65;">
+          Export saves all custom KPIs and scenarios as a JSON file you can reload later. Import replaces the current library — built-in data is restored on next page load if not re-imported.
         </div>
       </div>
     </div>
@@ -741,119 +527,374 @@ body::after{
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- Modal for Import/Export -->
+<!-- EXPORT MODAL -->
 <div id="exportModal" class="modal">
   <div class="modal-content">
-    <span class="close" onclick="closeModal()">&times;</span>
+    <span class="modal-close" onclick="closeModal()">×</span>
     <h4>Export Data</h4>
-    <textarea id="exportText" style="width:100%;height:200px;"></textarea>
-    <button class="btn btn-teal" onclick="downloadExport()">Download JSON</button>
-    <button class="btn btn-amber" onclick="copyExport()">Copy to Clipboard</button>
+    <textarea id="exportText" class="ef-textarea" style="height:200px;font-family:'Share Tech Mono',monospace;font-size:.7rem;"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-sm btn-teal" onclick="downloadExport()">⬇ Download JSON</button>
+      <button class="btn btn-sm btn-amber" onclick="copyExport()">📋 Copy</button>
+      <button class="btn btn-sm" onclick="closeModal()">Close</button>
+    </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 /* ══════════════════════════════════════════
-   KPI MASTER DATA — Expanded with more KPIs
+   UTILITIES
 ══════════════════════════════════════════ */
-let KPI_DATA = [
-  // Reliability
-  {code:'RL.1.1', name:'Perfect Customer Order Fulfillment', cat:'RL', unit:'%', dir:1, desc:'% of customer orders delivered on time, complete, damage-free, with correct docs', baseline:85, min:20, max:100},
-  {code:'RL.1.2', name:'Perfect Supplier Order Fulfillment', cat:'RL', unit:'%', dir:1, desc:'% of supplier POs received on time, complete, and to specification', baseline:80, min:20, max:100},
-  {code:'RL.1.3', name:'Perfect Return Order Fulfillment', cat:'RL', unit:'%', dir:1, desc:'% of customer return orders processed within agreed time and condition standards', baseline:75, min:10, max:100},
-  {code:'RL.2.1', name:'On-Time Delivery Performance', cat:'RL', unit:'%', dir:1, desc:'Percentage of deliveries made on time', baseline:90, min:50, max:100},
-  {code:'RL.2.2', name:'Order Accuracy', cat:'RL', unit:'%', dir:1, desc:'Percentage of orders delivered accurately', baseline:95, min:70, max:100},
-  // Responsiveness
-  {code:'RS.1.1', name:'Customer Order Fulfillment Cycle Time', cat:'RS', unit:'days', dir:-1, desc:'Average days from confirmed customer order to physical delivery at customer site', baseline:7, min:1, max:45},
-  {code:'RS.1.2', name:'Source Cycle Time', cat:'RS', unit:'days', dir:-1, desc:'Average days from purchase order issue to receipt at NexaFlow facility', baseline:14, min:3, max:60},
-  {code:'RS.2.1', name:'Return Processing Cycle Time', cat:'RS', unit:'days', dir:-1, desc:'Average days to process returns', baseline:5, min:1, max:30},
-  // Agility
-  {code:'AG.1.1', name:'Supply Chain Agility', cat:'AG', unit:'%', dir:1, desc:'Ability to respond to unplanned demand or supply changes within a 30-day window', baseline:70, min:10, max:100},
-  {code:'AG.1.2', name:'Upside Supply Chain Adaptability', cat:'AG', unit:'%', dir:1, desc:'Maximum sustainable % increase in deliverable quantity achievable within 30 days', baseline:25, min:0, max:80},
-  {code:'AG.2.1', name:'Downside Supply Chain Adaptability', cat:'AG', unit:'%', dir:1, desc:'Maximum sustainable % decrease in deliverable quantity achievable within 30 days', baseline:20, min:0, max:70},
-  // Cost
-  {code:'CO.1.1', name:'Total SC Management Cost', cat:'CO', unit:'% rev', dir:-1, desc:'Total SC operating cost (warehousing, transport, planning, returns) as % of revenue', baseline:12, min:4, max:35},
-  {code:'CO.1.2', name:'Cost of Goods Sold', cat:'CO', unit:'% rev', dir:-1, desc:'Direct production and materials cost as % of revenue', baseline:58, min:35, max:80},
-  {code:'CO.2.1', name:'Transportation Cost', cat:'CO', unit:'% rev', dir:-1, desc:'Transportation costs as % of revenue', baseline:5, min:1, max:15},
-  // Asset Management
-  {code:'AM.1.1', name:'Cash-to-Cash Cycle Time', cat:'AM', unit:'days', dir:-1, desc:'DIO + DSO − DPO: days between paying suppliers and collecting from customers', baseline:45, min:5, max:120},
-  {code:'AM.1.2', name:'Return on Fixed Assets', cat:'AM', unit:'%', dir:1, desc:'EBIT / net fixed asset value — efficiency of physical capital deployed', baseline:24, min:0, max:60},
-  {code:'AM.1.3', name:'Return on Working Capital', cat:'AM', unit:'%', dir:1, desc:'EBIT / (Inventory + Accounts Receivable − Accounts Payable)', baseline:32, min:0, max:80},
-  {code:'AM.1.4', name:'EBIT Margin', cat:'AM', unit:'% rev', dir:1, desc:'Earnings Before Interest & Taxes as % of revenue — overall operational profitability', baseline:18, min:-5, max:40},
-  {code:'AM.2.1', name:'Inventory Turns', cat:'AM', unit:'ratio', dir:1, desc:'Number of inventory turns per year', baseline:8, min:1, max:20},
-];
-
-/* ══════════════════════════════════════════
-   SCENARIO MASTER DATA — Expanded with 20+ new scenarios
-══════════════════════════════════════════ */
-let SCENARIOS = [
-  // Original scenarios here (omitted for brevity, assume they are included)
-  // New scenarios
-  {
-    id:'s15', title:'Cyber Attack on Supplier Network', cat:'Disruption',
-    process:'Source → Enable', tags4P:['Performance','Practice'],
-    desc:'A cyber attack compromises key suppliers\' systems, delaying deliveries and exposing data. How to mitigate?',
-    affectedKpis:['RL.1.2','AG.1.1','CO.1.1'],
-    insight:'Cyber resilience is an Enable function in SCOR-DS. Diversification and backups are key.',
-    decisions:[
-      {letter:'A', title:'Switch to Backup Suppliers', desc:'Activate alternate suppliers immediately.', impacts:{RL_1_2:-5, AG_1_1:+10, CO_1_1:-8}, debrief:'Improves agility but increases cost.'},
-      {letter:'B', title:'Enhance Cybersecurity Protocols', desc:'Invest in supplier cybersecurity audits.', impacts:{RL_1_2:+8, CO_1_1:-5, AG_1_1:+5}, debrief:'Long-term resilience boost.'},
-      {letter:'C', title:'Stockpile Critical Items', desc:'Increase inventory for key items.', impacts:{AM_1_1:-10, RL_1_2:+5}, debrief:'Short-term reliability at asset cost.'},
-    ]
-  },
-  {
-  id:'s20', title:'AI-Driven Forecasting Error', cat:'Technology',
-  process:'Orchestrate', tags4P:['Practice','Performance'],
-  desc:'AI forecast overpredicts demand, causing excess inventory.',
-  affectedKpis:['AM.1.1','RL.1.1','CO.1.2'],
-  insight:'AI in Orchestrate needs human oversight.',
-  decisions:[
-    {letter:'A', title:'Ignore and Sell Excess', impacts:{CO_1_2:-10, AM_1_1:-15}, debrief:'Increases holding costs.'},
-    {letter:'B', title:'Adjust AI Parameters', impacts:{RL_1_1:+8, AM_1_1:+5}, debrief:'Improves future accuracy.'},
-    {letter:'C', title:'Manual Override', impacts:{AG_1_1:-5, RL_1_1:+10}, debrief:'Safe but reduces agility.'},
-  ]
-},
-// Add 4 more similar scenarios...
-  // Add 19 more new scenarios similarly... (omitted for space, but in full code they would be added with varied themes like sustainability, AI integration, global trade wars, etc.)
-];
-
-/* ══════════════════════════════════════════
-   GAME STATE (Enhanced with history, difficulty, AI, theme)
-══════════════════════════════════════════ */
-let G = {
-  focusKpi: null,
-  teamCount: 2,
-  teams: [],
-  totalRounds: 5,
-  currentRound: 1,
-  currentTeamIdx: 0,
-  scenarioQueue: [],
-  currentScenario: null,
-  selectedDecision: null,
-  phase: 'team-turn',
-  teamDecisions: [],
-  difficulty: 'easy', // easy, medium, hard
-  aiEnabled: false, // for single team games
-  theme: 'dark', // dark, light
-  roundHistory: [], // Track score and KPI evolution
-  scoreHistory: [], // Per team per round
-  kpiHistory: {}, // Per KPI per team per round
-};
-
-/* ══════════════════════════════════════════
-   PERSISTENCE — LocalStorage
-══════════════════════════════════════════ */
-function loadData() {
-  const savedKpis = localStorage.getItem('kpiData');
-  const savedScenarios = localStorage.getItem('scenarios');
-  if (savedKpis) KPI_DATA = JSON.parse(savedKpis);
-  if (savedScenarios) SCENARIOS = JSON.parse(savedScenarios);
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function saveData() {
-  localStorage.setItem('kpiData', JSON.stringify(KPI_DATA));
-  localStorage.setItem('scenarios', JSON.stringify(SCENARIOS));
+/* ══════════════════════════════════════════
+   TRANSLATIONS — UI chrome only.
+   Scenario pedagogical content (titles, descs,
+   debriefs, insights) remains in English.
+   Full scenario localisation is Phase 2.
+══════════════════════════════════════════ */
+let lang = 'en';
+const TR = {
+  en:{
+    tagline:'A competitive KPI simulation grounded in SCOR-DS. Make decisions. Navigate trade-offs. Prove that global performance demands local sacrifice.',
+    focusKpiSection:'🎯 Select Focus KPI',focusKpiHint:'(drives double scoring this session)',
+    teamsSection:'👥 Number of Teams',roundsSection:'🔄 Number of Rounds',
+    diffSection:'🛡️ Difficulty Level',easy:'Easy',medium:'Medium',hard:'Hard',
+    launchBtn:'Launch Simulation →',editBtn:'Edit Scenarios & KPIs',
+    progress:'Progress',focusKpiPts:'Focus KPI (×2 pts)',liveSb:'Live Scoreboard',
+    roundHistory:'Round History',
+    scenarioBrief:'SCENARIO BRIEF',teamDecision:'TEAM DECISION',
+    selectDecision:'SELECT A DECISION TO CONTINUE',confirmDecision:'Confirm Decision',
+    resultsDebrief:'RESULTS & DEBRIEF',allRevealed:'All Decisions Revealed',
+    reviewDiscuss:'REVIEW & DISCUSS — ADVANCE TO NEXT ROUND',
+    viewFinal:'VIEW FINAL STANDINGS',nextRound:'Next Round',
+    viewFinalResults:'View Final Results →',strategicOptions:'Strategic Options',
+    kpisAffected:'KPIs AFFECTED THIS ROUND',
+    simComplete:'Simulation Complete',finalStandings:'Final',finalStandingsSpan:'Standings',
+    totalPoints:'Total Points',scoreEvo:'Score Evolution',focusKpiEvo:'Focus KPI Evolution',
+    newGame:'New Game',replay:'Replay Same Setup',editGame:'✏️ Edit Game',exportGame:'Export Game Data',
+    editorTitle:'Editor v3',tabScenarios:'📋 Scenarios',tabKpis:'📊 KPI Library',
+    tabRules:'📖 How to Play',tabIE:'🔄 Import/Export',
+    diffHint:(d)=>d==='easy'?'Impacts ×0.8 — forgiving':d==='hard'?'Impacts ×1.2 — unforgiving':'Standard impacts',
+    aiLabel:'(AI)',saveGame:'💾 Save',loadGame:'📂 Load',
+    selectFocusFirst:'Please select a Focus KPI first',
+    noSavedGame:'No saved game found',gameSaved:'Game saved',gameLoaded:'Game loaded',
+    langToggle:'🇫🇷 Français',
+    scorInsight:'SCOR-DS Insight',systemicInsight:'Systemic Insight — Facilitator Debrief',
+    teamDecisionLocked:(n1,n2)=>`✓ ${n1} decision locked. ${n2} — your turn.`,
+    lockIn:(l)=>`Lock In: Option ${l}`,
+    decisionSelected:(l)=>`DECISION ${l} SELECTED — CONFIRM TO LOCK IN`,
+  },
+  fr:{
+    tagline:'Une simulation KPI compétitive ancrée dans SCOR-DS. Prenez des décisions. Gérez les arbitrages. Prouvez que la performance globale exige des sacrifices locaux.',
+    focusKpiSection:'🎯 Sélectionnez le KPI Focus',focusKpiHint:'(double les points pour ce KPI)',
+    teamsSection:'👥 Nombre d\'Équipes',roundsSection:'🔄 Nombre de Tours',
+    diffSection:'🛡️ Niveau de Difficulté',easy:'Facile',medium:'Moyen',hard:'Difficile',
+    launchBtn:'Lancer la Simulation →',editBtn:'Modifier Scénarios & KPIs',
+    progress:'Progression',focusKpiPts:'KPI Focus (×2 pts)',liveSb:'Classement en direct',
+    roundHistory:'Historique des tours',
+    scenarioBrief:'BRIEF DU SCÉNARIO',teamDecision:'DÉCISION D\'ÉQUIPE',
+    selectDecision:'SÉLECTIONNEZ UNE DÉCISION POUR CONTINUER',
+    confirmDecision:'Confirmer la Décision',
+    resultsDebrief:'RÉSULTATS & DÉBRIEF',allRevealed:'Toutes les Décisions Révélées',
+    reviewDiscuss:'RÉVISEZ & DISCUTEZ — PASSER AU TOUR SUIVANT',
+    viewFinal:'VOIR LES CLASSEMENTS FINAUX',nextRound:'Tour Suivant',
+    viewFinalResults:'Voir les Résultats Finaux →',
+    strategicOptions:'Options Stratégiques',kpisAffected:'KPIs AFFECTÉS CE TOUR',
+    simComplete:'Simulation Terminée',finalStandings:'Classements',finalStandingsSpan:'Finaux',
+    totalPoints:'Points Totaux',scoreEvo:'Évolution des Scores',focusKpiEvo:'Évolution du KPI Focus',
+    newGame:'Nouvelle Partie',replay:'Rejouer la même configuration',
+    editGame:'✏️ Modifier le Jeu',exportGame:'Exporter les Données',
+    editorTitle:'Éditeur v3',tabScenarios:'📋 Scénarios',tabKpis:'📊 Bibliothèque KPIs',
+    tabRules:'📖 Comment Jouer',tabIE:'🔄 Importer/Exporter',
+    diffHint:(d)=>d==='easy'?'Impacts ×0.8 — indulgent':d==='hard'?'Impacts ×1.2 — sévère':'Impacts standards',
+    aiLabel:'(IA)',saveGame:'💾 Sauvegarder',loadGame:'📂 Charger',
+    selectFocusFirst:'Veuillez d\'abord sélectionner un KPI Focus',
+    noSavedGame:'Aucune partie sauvegardée',gameSaved:'Partie sauvegardée',
+    gameLoaded:'Partie chargée',langToggle:'🇬🇧 English',
+    scorInsight:'Insight SCOR-DS',systemicInsight:'Insight Systémique — Débrief Facilitateur',
+    teamDecisionLocked:(n1,n2)=>`✓ ${n1} décision verrouillée. ${n2} — à votre tour.`,
+    lockIn:(l)=>`Verrouiller : Option ${l}`,
+    decisionSelected:(l)=>`OPTION ${l} SÉLECTIONNÉE — CONFIRMEZ POUR VALIDER`,
+  }
+};
+function t(key,...args){
+  const v = TR[lang][key] ?? TR.en[key] ?? key;
+  return typeof v === 'function' ? v(...args) : v;
+}
+
+function toggleLanguage(){
+  lang = lang==='en'?'fr':'en';
+  refreshAllUI();
+}
+
+function refreshAllUI(){
+  // Setup screen
+  document.getElementById('setup-tagline').textContent = t('tagline');
+  document.getElementById('h-focusKpi').innerHTML = `${t('focusKpiSection')} <span style="font-size:.7rem;font-weight:400;color:var(--muted);">${t('focusKpiHint')}</span>`;
+  document.getElementById('h-teams').textContent = t('teamsSection');
+  document.getElementById('h-rounds').textContent = t('roundsSection');
+  document.getElementById('h-difficulty').textContent = t('diffSection');
+  document.getElementById('diff-easy').textContent = t('easy');
+  document.getElementById('diff-medium').textContent = t('medium');
+  document.getElementById('diff-hard').textContent = t('hard');
+  document.getElementById('startBtn').textContent = t('launchBtn');
+  document.getElementById('editBtn-label').textContent = t('editBtn');
+  document.getElementById('langBtn').textContent = t('langToggle');
+  // Game screen
+  if(document.getElementById('gameLangBtn')) document.getElementById('gameLangBtn').textContent = t('langToggle').split(' ')[0];
+  document.getElementById('lb-progress').textContent = t('progress');
+  document.getElementById('lb-focusKpiPts').textContent = t('focusKpiPts');
+  document.getElementById('lb-liveSb').textContent = t('liveSb');
+  document.getElementById('lb-roundHistory').textContent = t('roundHistory');
+  document.getElementById('lb-save').textContent = t('saveGame');
+  document.getElementById('lb-load').textContent = t('loadGame');
+  // Results screen
+  document.getElementById('lb-simComplete').textContent = t('simComplete');
+  document.getElementById('lb-finalStandings').innerHTML = `${t('finalStandings')} <span style="color:var(--amber)">${t('finalStandingsSpan')}</span>`;
+  document.getElementById('lb-scoreEvo').textContent = t('scoreEvo');
+  document.getElementById('lb-focusKpiEvo').textContent = t('focusKpiEvo');
+  document.getElementById('lb-newGame').textContent = t('newGame');
+  document.getElementById('lb-replay').textContent = t('replay');
+  document.getElementById('lb-editGame').textContent = t('editGame');
+  document.getElementById('lb-exportGame').textContent = t('exportGame');
+  // Editor screen
+  document.getElementById('lb-editorTitle').textContent = t('editorTitle');
+  document.getElementById('tab-scenarios').textContent = t('tabScenarios');
+  document.getElementById('tab-kpis').textContent = t('tabKpis');
+  document.getElementById('tab-rules').textContent = t('tabRules');
+  document.getElementById('tab-ie').textContent = t('tabIE');
+  // Rebuild KPI picker with correct language
+  buildKpiPicker();
+  buildScorMap();
+}
+
+/* ══════════════════════════════════════════
+   KPI MASTER DATA — SCOR-DS 5 attributes
+   Includes Level-1 and key Level-2 KPIs
+══════════════════════════════════════════ */
+let KPI_DATA = [
+  // RL: Reliability
+  {code:'RL.1.1',name:'Perfect Customer Order Fulfillment',cat:'RL',unit:'%',dir:1,desc:'% of customer orders delivered on time, complete, damage-free, with correct docs',baseline:85,min:20,max:100},
+  {code:'RL.1.2',name:'Perfect Supplier Order Fulfillment',cat:'RL',unit:'%',dir:1,desc:'% of supplier POs received on time, complete, and to specification',baseline:80,min:20,max:100},
+  {code:'RL.1.3',name:'Perfect Return Order Fulfillment',cat:'RL',unit:'%',dir:1,desc:'% of customer return orders processed within agreed standards',baseline:75,min:10,max:100},
+  {code:'RL.2.1',name:'On-Time Delivery Performance',cat:'RL',unit:'%',dir:1,desc:'Percentage of deliveries made on or before the committed date',baseline:90,min:50,max:100},
+  {code:'RL.2.2',name:'Order Accuracy',cat:'RL',unit:'%',dir:1,desc:'Percentage of orders delivered with zero errors (quantity, item, documentation)',baseline:95,min:70,max:100},
+  // RS: Responsiveness
+  {code:'RS.1.1',name:'Customer Order Fulfillment Cycle Time',cat:'RS',unit:'days',dir:-1,desc:'Average days from confirmed order to physical delivery at customer site',baseline:7,min:1,max:45},
+  {code:'RS.1.2',name:'Source Cycle Time',cat:'RS',unit:'days',dir:-1,desc:'Average days from PO issue to receipt at facility',baseline:14,min:3,max:60},
+  {code:'RS.2.1',name:'Return Processing Cycle Time',cat:'RS',unit:'days',dir:-1,desc:'Average days to process and close a customer return',baseline:5,min:1,max:30},
+  // AG: Agility
+  {code:'AG.1.1',name:'Supply Chain Agility',cat:'AG',unit:'%',dir:1,desc:'Ability to respond to unplanned demand or supply changes within 30 days',baseline:70,min:10,max:100},
+  {code:'AG.1.2',name:'Upside Supply Chain Adaptability',cat:'AG',unit:'%',dir:1,desc:'Max sustainable % increase in deliverable quantity within 30 days',baseline:25,min:0,max:80},
+  {code:'AG.2.1',name:'Downside Supply Chain Adaptability',cat:'AG',unit:'%',dir:1,desc:'Max sustainable % decrease in deliverable quantity within 30 days without penalty',baseline:20,min:0,max:70},
+  // CO: Cost
+  {code:'CO.1.1',name:'Total SC Management Cost',cat:'CO',unit:'% rev',dir:-1,desc:'Total SC operating cost as % of revenue',baseline:12,min:4,max:35},
+  {code:'CO.1.2',name:'Cost of Goods Sold',cat:'CO',unit:'% rev',dir:-1,desc:'Direct production and materials cost as % of revenue',baseline:58,min:35,max:80},
+  {code:'CO.2.1',name:'Transportation Cost',cat:'CO',unit:'% rev',dir:-1,desc:'Total transportation costs as % of revenue',baseline:5,min:1,max:15},
+  // AM: Asset Management
+  {code:'AM.1.1',name:'Cash-to-Cash Cycle Time',cat:'AM',unit:'days',dir:-1,desc:'DIO + DSO − DPO: days between paying suppliers and collecting from customers',baseline:45,min:5,max:120},
+  {code:'AM.1.2',name:'Return on Fixed Assets',cat:'AM',unit:'%',dir:1,desc:'EBIT / net fixed asset value',baseline:24,min:0,max:60},
+  {code:'AM.1.3',name:'Return on Working Capital',cat:'AM',unit:'%',dir:1,desc:'EBIT / (Inventory + AR − AP)',baseline:32,min:0,max:80},
+  {code:'AM.1.4',name:'EBIT Margin',cat:'AM',unit:'% rev',dir:1,desc:'Earnings Before Interest & Taxes as % of revenue',baseline:18,min:-5,max:40},
+  {code:'AM.2.1',name:'Inventory Turns',cat:'AM',unit:'ratio',dir:1,desc:'Number of inventory turns per year (COGS / Average Inventory)',baseline:8,min:1,max:20},
+];
+
+/* ══════════════════════════════════════════
+   SCENARIO MASTER DATA — 14 scenarios
+   (Content in English — French UI chrome
+    is handled by the translation layer)
+══════════════════════════════════════════ */
+let SCENARIOS = [
+  {id:'s01',title:'Major Port Strike — 3-Week Disruption',cat:'Disruption',process:'Source → Fulfill',tags4P:['Process','Agility','Performance'],
+   desc:'Dockworkers at your primary import port have called an indefinite strike. 40% of your inbound goods are blocked. Customers are already asking for status updates and delay penalties are accruing.',
+   affectedKpis:['RL.1.1','RS.1.1','CO.1.1','AG.1.1'],
+   insight:'This is a Source resilience scenario. SCOR-DS Source process requires pre-qualified alternative routes and suppliers (Agility practice). The trade-off here is always between cost (CO) and reliability (RL) — there is no free option. Note how decisions that protect RL.1.1 universally hit CO.1.1. That is systemic, not accidental.',
+   decisions:[
+     {letter:'A',title:'Activate Pre-Qualified Backup Suppliers',desc:'Trigger your Tier-2 supplier agreements immediately. Higher unit cost (+15%) but maintains inbound flow.',impacts:{RL_1_1:+8,RS_1_1:-4,CO_1_1:-9,AG_1_1:+12},debrief:'SCOR-DS Agility (AG): this option works because the infrastructure was built in advance — a pre-qualified supplier network. AG.1.1 improves because the capability now proven is real agility, not reactive scrambling.'},
+     {letter:'B',title:'Air Freight Critical SKUs Only',desc:'Identify top 20% of SKUs by revenue and air freight those only. Remaining 80% delayed 3+ weeks.',impacts:{RL_1_1:+3,RS_1_1:+5,CO_1_1:-18,CO_1_2:-8,AM_1_4:-6},debrief:'Partial triage: prioritizing by customer revenue is valid but incomplete. The cost hit on CO.1.1 is severe. This option trades margin (AM.1.4) for partial fulfillment.'},
+     {letter:'C',title:'Transparent Customer Communication + Partial Ship',desc:'Proactively notify all customers, offer partial shipments from stock, prioritize key accounts.',impacts:{RL_1_1:-8,RS_1_1:-12,AG_1_1:+5,AM_1_4:+2},debrief:'Honesty over heroics. RL.1.1 drops because orders are not fulfilled perfectly. But customer trust, if managed well, creates longer-term reliability. SCOR-DS Enable: relationship management is a supply chain capability.'},
+     {letter:'D',title:'Reroute via Alternative Port (+5 days)',desc:'Redirect shipments to secondary port 400km away. +5 days transit, moderate trucking cost increase, full volume maintained.',impacts:{RL_1_1:+4,RS_1_1:-7,CO_1_1:-5,CO_1_2:-3},debrief:'Infrastructure flexibility: the ability to reroute assumes prior mapping of alternative nodes — an Enable process responsibility. Moderate on both dimensions.'},
+   ]},
+  {id:'s02',title:'Flash Demand Spike — 180% of Forecast',cat:'Market Shift',process:'Order → Fulfill',tags4P:['Performance','Process'],
+   desc:'A viral campaign has driven demand to 180% of forecast. Emergency orders are flooding in. Production is at 100% capacity with a 3-week lead time.',
+   affectedKpis:['RL.1.1','RS.1.1','AG.1.1','AM.1.3'],
+   insight:'Demand surge tests the Order macro-process. The core SCOR-DS tension: serving all customers poorly vs. serving some customers perfectly. The right answer depends on your strategic segmentation — which SCOR-DS Order requires you to define in advance.',
+   decisions:[
+     {letter:'A',title:'Controlled Allocation — Fair Share to All',desc:'Each customer receives a capped % of their usual order volume. Prevents stockouts for any single account.',impacts:{RL_1_1:+5,RS_1_1:-8,AG_1_1:+8,AM_1_3:+6},debrief:'Order segmentation: fairness is operationally simple but strategically blunt. AG.1.1 improves because a controlled allocation system demonstrates operational responsiveness.'},
+     {letter:'B',title:'Priority to Top 20% Customers',desc:'Fully serve your most profitable customers first. Remainder enter a waitlist.',impacts:{RL_1_1:-4,RS_1_1:+5,AG_1_1:+4,AM_1_4:+10},debrief:'Revenue-based triage: AM.1.4 improves because high-margin orders are served. But RL.1.1 globally drops — 80% of customers see delayed or cancelled orders. Optimizing the top 20% is a local optimization.'},
+     {letter:'C',title:'Emergency Overtime + Contract Manufacturing',desc:'Run 3-shift operations and engage a contract manufacturer. +30% production cost but captures the demand window.',impacts:{RL_1_1:+12,RS_1_1:+6,CO_1_1:-14,CO_1_2:-10,AM_1_3:+8},debrief:'Transform capacity response: the correct Agility answer when Transform has flex capacity. Only works if contract manufacturing is pre-qualified — another pre-built Enable capability.'},
+   ]},
+  {id:'s03',title:'Key Supplier Financial Distress Warning',cat:'Disruption',process:'Source',tags4P:['Process','Performance','Practice'],
+   desc:'Intelligence indicates your single-source Tier-1 supplier (35% of components) faces financial difficulties. Risk of supply interruption within 60–90 days rated HIGH.',
+   affectedKpis:['RL.1.2','RL.1.1','CO.1.1','AG.1.1'],
+   insight:'Single-source dependency is a structural Source vulnerability. SCOR-DS Source requires supplier segmentation and pre-qualification of alternatives. Every option here is a reaction — the real insight is that resilience is built during calm periods, not during crises.',
+   decisions:[
+     {letter:'A',title:'Build 90-Day Safety Stock Now',desc:'Immediately purchase buffer inventory from this supplier.',impacts:{RL_1_1:+10,RL_1_2:+8,CO_1_1:-10,AM_1_1:-8,AM_1_3:-5},debrief:'Inventory as insurance: protects RL in the short term but degrades AM. It does not solve the structural problem. Buying more from a fragile supplier increases, not reduces, dependency risk.'},
+     {letter:'B',title:'Accelerate Dual-Sourcing Initiative',desc:'Fast-track qualification of 2 alternative suppliers. 60-day qualification window.',impacts:{RL_1_2:+12,AG_1_1:+15,CO_1_1:-8,RS_1_2:-5},debrief:'Structural resilience: the right SCOR-DS Source answer. Dual-sourcing permanently improves AG.1.1 by removing single-source fragility. Long-term correct, short-term costly.'},
+     {letter:'C',title:'Provide Supplier Financial Support',desc:'Offer advance payment to keep supplier solvent. Ties up NexaFlow cash and does not resolve root cause.',impacts:{RL_1_2:+6,AM_1_1:-12,AM_1_3:-7,AM_1_4:-4},debrief:'SCOR-DS Enable — supplier relationship management. This buys time but deepens dependency. Use only as a bridge while executing Option B.'},
+   ]},
+  {id:'s04',title:'Warehouse Automation Investment Decision',cat:'Technology',process:'Fulfill → Transform',tags4P:['Process','Practice','Performance'],
+   desc:'A $2.4M warehouse robotics system promises 40% labor cost reduction, 99.8% pick accuracy, and 30% cycle time improvement. Payback: 2.8 years. Implementation disruption: 6 months.',
+   affectedKpis:['RL.1.1','RS.1.1','CO.1.1','AM.1.2'],
+   insight:'Technology investment in Fulfill is only as valuable as the process design around it. SCOR-DS warns against digitizing broken processes — automation at speed amplifies existing errors.',
+   decisions:[
+     {letter:'A',title:'Full Deployment — Phase 1 Start Now',desc:'Authorize full $2.4M. Accept 6-month disruption, then step-change improvement.',impacts:{RL_1_1:+15,RS_1_1:+12,CO_1_1:+8,AM_1_2:+10,AM_1_4:-4},debrief:'Big-bang automation: the numbers are right but the risk is front-loaded. If the 6-month disruption coincides with peak demand, RL.1.1 could fall sharply before recovering.'},
+     {letter:'B',title:'Pilot One Zone — Prove ROI First',desc:'Invest in 1 of 4 warehouse zones. Lower risk, slower benefits.',impacts:{RL_1_1:+5,RS_1_1:+4,CO_1_1:+2,AM_1_2:+3},debrief:'Empirical learning: SCOR-DS Practice — test, measure, scale. Modest short-term improvement but de-risks the full investment.'},
+     {letter:'C',title:'Defer — Optimize Current Processes Instead',desc:'Invest in training, layout redesign, WMS optimization. ~$200K, no disruption.',impacts:{RL_1_1:+4,RS_1_1:+3,CO_1_1:+4,AM_1_4:+3},debrief:'SCOR-DS Practice principle: process excellence before technology. Automation of a suboptimal process produces optimally bad results at speed.'},
+     {letter:'D',title:'Lease Option — Capex to Opex',desc:'Negotiate a robotics-as-a-service lease. Higher long-term cost, preserves capital.',impacts:{RL_1_1:+13,RS_1_1:+10,CO_1_1:-3,AM_1_2:+6,AM_1_1:-4},debrief:'Financial engineering of Fulfill: AM.1.2 improves because the asset does not appear on the balance sheet. Good balance for capital-constrained organizations.'},
+   ]},
+  {id:'s05',title:'Carbon Border Tax Compliance Deadline',cat:'Compliance',process:'Source → Enable',tags4P:['Practice','Process','People'],
+   desc:'New regulation: all imported goods require certified carbon documentation within 90 days or face an 8% surcharge. 60% of your supplier base is not yet compliant.',
+   affectedKpis:['RL.1.2','CO.1.2','CO.1.1','AM.1.4'],
+   insight:'SCOR-DS Enable encompasses regulatory compliance and sustainability standards. Organizations that treat ESG as an Enable investment outperform those that treat it as a tax.',
+   decisions:[
+     {letter:'A',title:'Supplier Compliance Program — Full Support',desc:'Fund and deploy a supplier audit + technical assistance program.',impacts:{RL_1_2:+10,CO_1_1:-12,CO_1_2:-4,AM_1_4:+8,AG_1_1:+6},debrief:'Enable investment: treating suppliers as partners in a shared value chain. AM.1.4 improves long-term because the ecosystem becomes more stable and predictable.'},
+     {letter:'B',title:'Switch to Pre-Certified Suppliers Only',desc:'Immediately source only from already-certified suppliers.',impacts:{RL_1_2:-5,CO_1_2:-10,AM_1_4:+12,AG_1_1:-8},debrief:'AM.1.4 improves because the tax is avoided. But AG.1.1 falls sharply — a smaller, compliance-filtered supplier pool means less flexibility. Local financial optimization, systemic agility hit.'},
+     {letter:'C',title:'Absorb the Surcharge Short-Term',desc:'Pay the 8% carbon tax while preparing a compliance strategy.',impacts:{CO_1_1:-8,CO_1_2:-8,AM_1_4:-10},debrief:'Delay at a cost: CO and AM degrade immediately. SCOR-DS Enable principle: regulatory risk is a supply chain risk, not a legal department problem.'},
+   ]},
+  {id:'s06',title:'Customer Returns Surge — 22% Return Rate',cat:'Market Shift',process:'Return',tags4P:['Process','Performance','Practice'],
+   desc:'A manufacturing defect has driven return rates to 22% (industry norm: 8%). Root cause: production batches 3–5. ~40,000 units are in the field.',
+   affectedKpis:['RL.1.3','RL.1.1','CO.1.1','AM.1.4'],
+   insight:'SCOR-DS Return is a first-class macro-process, not an afterthought. Most organizations underfund Return processes — and this scenario shows what happens when a quality event hits an unprepared Return infrastructure.',
+   decisions:[
+     {letter:'A',title:'Proactive Full Recall + Replacement Program',desc:'Recall all affected units proactively before customers experience failures.',impacts:{RL_1_3:+15,RL_1_1:+8,CO_1_1:-22,AM_1_4:-15,AG_1_1:+5},debrief:'Return as a reliability investment: RL.1.3 and RL.1.1 both improve significantly. The cost is severe but this is an investment in customer lifetime value.'},
+     {letter:'B',title:'Reactive Replacement — Returns Only',desc:'Process returns as they arrive, no proactive outreach.',impacts:{RL_1_3:+5,RL_1_1:-5,CO_1_1:-8,AM_1_4:-5},debrief:'Reactive Return: RL.1.1 falls because customers who experience the defect in the field receive no advance warning. Lower cost but the asymmetric reputational risk is not captured in these KPIs.'},
+     {letter:'C',title:'Redesign Return Process + Repair Option',desc:'Create an efficient returns + repair pathway. Free repair for affected units.',impacts:{RL_1_3:+10,CO_1_1:-12,AM_1_4:-6,AM_1_3:+3},debrief:'Process innovation in Return: treats the crisis as a Return process design opportunity. AM.1.3 improves slightly because repair recovers asset value.'},
+   ]},
+  {id:'s07',title:'New Market Entry — Emerging Market Distribution',cat:'Opportunity',process:'Fulfill → Order',tags4P:['Process','Practice','Performance'],
+   desc:'High-growth market research confirms strong demand potential in a new geography. Entry requires building a local distribution presence: 3PL, owned DC, or e-commerce direct.',
+   affectedKpis:['RS.1.1','CO.1.1','AM.1.2','AM.1.4'],
+   insight:'Market entry is an Orchestrate + Fulfill design decision. SCOR-DS requires you to choose your Fulfill model before committing capital. None is universally right — it depends on strategic intent.',
+   decisions:[
+     {letter:'A',title:'3PL Partnership — Asset-Light Entry',desc:'Partner with established local 3PL. Fast market entry, low capex, shared margin.',impacts:{RS_1_1:+6,CO_1_1:-5,AM_1_2:+8,AM_1_4:+6},debrief:'Enable-driven entry: AM.1.2 improves because no fixed assets are deployed. Fast, low-risk, correct for market validation.'},
+     {letter:'B',title:'Owned Distribution Center',desc:'Build or lease owned DC. 12–18 month setup, maximum long-term control.',impacts:{RS_1_1:+12,CO_1_1:-18,AM_1_2:-5,AM_1_4:-4},debrief:'Full Fulfill ownership: maximum long-term RS.1.1 performance but AM.1.2 degrades. Correct for confirmed high-volume markets.'},
+     {letter:'C',title:'E-Commerce Direct — No Physical Footprint',desc:'Sell direct online, cross-border shipping. Lowest entry cost, tests demand.',impacts:{RS_1_1:-3,CO_1_1:+4,AM_1_4:+10,AM_1_1:+8},debrief:'Order innovation: shifts the Order macro-process to digital, eliminates local Fulfill infrastructure. Correct for proof-of-concept before infrastructure investment.'},
+   ]},
+  {id:'s08',title:'Working Capital Crisis — Extend Payment Terms?',cat:'Compliance',process:'Orchestrate → Source',tags4P:['Performance','People','Process'],
+   desc:'Your CFO demands negotiating 90-day payment terms with all suppliers (currently 45 days). This frees $8M in working capital but may strain supplier relationships.',
+   affectedKpis:['AM.1.1','AM.1.3','RL.1.2','AM.1.4'],
+   insight:'This is the NexaFlow paradox in miniature: optimizing a financial metric (AM.1.1) by exporting the cost to suppliers. A supply chain that achieves working capital targets by financially stressing its ecosystem is building fragility, not efficiency.',
+   decisions:[
+     {letter:'A',title:'Negotiate 90-Day Terms — All Suppliers',desc:'Push full payment extension across all suppliers simultaneously.',impacts:{AM_1_1:+18,AM_1_3:+12,RL_1_2:-8,CO_1_1:-3},debrief:'Working capital by extraction: AM.1.1 improves dramatically but RL.1.2 falls — financially stressed suppliers begin shipping late or at lower quality. Short-term AM gain destroys Source reliability.'},
+     {letter:'B',title:'Supply Chain Finance Program',desc:'Offer early payment at a slight discount via SCF bank facility.',impacts:{AM_1_1:+10,AM_1_3:+8,RL_1_2:+5,AM_1_4:+4},debrief:'Enable innovation: Supply Chain Finance improves both NexaFlow cash position and supplier financial health simultaneously. This is the systemic solution.'},
+     {letter:'C',title:'Tiered Approach — Negotiate by Supplier Criticality',desc:'Large non-critical suppliers get 90 days. Small, critical suppliers stay at 45 days.',impacts:{AM_1_1:+8,AM_1_3:+6,RL_1_2:+2,CO_1_1:+2},debrief:'Source segmentation applied to financial management. Moderate cash improvement, minimal RL risk. The right balance for most situations.'},
+   ]},
+  {id:'s09',title:'The Bullwhip Trap — Purchasing Hits Targets, System Bleeds',cat:'Systemic',process:'Orchestrate → Source → Transform',tags4P:['Performance','Process','People'],
+   desc:'NexaFlow Purchasing has met its cost targets brilliantly — by ordering in large volumes every quarter. Transform (factories) are saturated. The dock cannot clear. Fulfill is missing shipments on critical SKUs while sitting on pallets of non-priority product.',
+   affectedKpis:['RL.1.1','CO.1.1','AM.1.1','AG.1.1'],
+   insight:'The Bullwhip Effect is the mathematically predictable result of local KPI optimization in Source without Orchestrate coordination. SCOR-DS Level 1 performance (RL.1.1, AM.1.1) cannot be achieved by optimizing components independently. The only correct fix is structural: change either the incentive architecture (People) or the process design (Orchestrate frequency).',
+   decisions:[
+     {letter:'A',title:'Implement Dynamic Lot Sizing — Frequency Over Volume',desc:'Replace quarterly bulk orders with weekly small orders aligned to actual consumption rates.',impacts:{CO_1_1:-4,RL_1_1:+10,AM_1_1:+8,AG_1_1:+8},debrief:'SCOR-DS Orchestrate principle: order frequency must match the system\'s flow requirements, not unit cost optimization. CO.1.1 takes a small hit — that is the price of system stability.'},
+     {letter:'B',title:'Keep Bulk Orders — Add Safety Stock Buffer',desc:'Maintain current Source behavior but add warehouse buffer to absorb Transform saturation spikes.',impacts:{CO_1_1:-8,CO_1_2:-3,AM_1_1:-12,RL_1_1:+3},debrief:'Classic supply chain mistake: inventory as the answer to variability. This does not reduce Bullwhip — it absorbs its consequences at the cost of Working Capital. Safety stock is not a strategy.'},
+     {letter:'C',title:'Cross-Functional S&OP Freeze — Unified Cadence',desc:'Freeze bulk orders. Convene Source + Transform + Fulfill to agree a single order frequency aligned to system capacity.',impacts:{RL_1_1:+5,AG_1_1:+12,CO_1_1:+2,AM_1_1:+4},debrief:'Orchestrate activated: this is the SCOR-DS Orchestrate macro-process doing what it exists to do — aligning all execution domains to a shared cadence.'},
+     {letter:'D',title:'Restructure Purchasing KPIs — Link to Downstream Outcomes',desc:'Change Purchasing metrics to include RL.1.1 and AM.1.1 targets, not just unit cost.',impacts:{RL_1_1:+8,AG_1_1:+8,CO_1_1:+3,AM_1_3:+6},debrief:'People dimension: incentive misalignment is the root cause of siloed behavior. When Purchasing\'s bonus depends on RL.1.1 and AM.1.1, they design for flow. SCOR-DS Enable explicitly includes incentive design as a supply chain function.'},
+   ]},
+  {id:'s10',title:'S&OP Without Capacity — Planning in a Vacuum',cat:'Systemic',process:'Orchestrate',tags4P:['Process','Practice','Performance'],
+   desc:'NexaFlow\'s S&OP produces a demand plan that Sales presents with confidence and Operations cannot execute. Real-time Transform capacity constraints are not integrated into the Orchestrate cycle. Committed delivery dates are systematically missed.',
+   affectedKpis:['RL.1.1','RS.1.1','AG.1.1','AM.1.4'],
+   insight:'This is the Orchestrate failure. An S&OP process that does not receive real-time capacity constraints from Transform is not Orchestrate — it is demand forecasting. The gap between what is planned and what is physically possible is exactly where NexaFlow\'s 24-day Cash-to-Cash degradation originates.',
+   decisions:[
+     {letter:'A',title:'Integrate Real-Time Capacity Feed into S&OP',desc:'Connect the simulation app to live Transform capacity data. No commitment is made that operations cannot fulfil.',impacts:{RL_1_1:+12,RS_1_1:+8,AG_1_1:+10,CO_1_1:-4},debrief:'Orchestrate fully activated: this closes the gap. SCOR-DS requires S&OP to be a closed-loop system integrating demand, supply, and capacity. When capacity constrains the plan, commitments become reliable.'},
+     {letter:'B',title:'Add Manual Capacity Review Step to Monthly S&OP',desc:'Operations reviews the S&OP output and flags infeasible commitments before they reach customers.',impacts:{RL_1_1:+6,RS_1_1:+3,AG_1_1:+4},debrief:'Workaround, not a solution: manual gates reduce errors but add latency. SCOR-DS Process calls for designed integration, not heroic intervention. Better than nothing — but root cause remains.'},
+     {letter:'C',title:'Reduce Planning Horizon to 4 Weeks',desc:'Shorten S&OP horizon to 4 weeks. Fewer capacity conflicts, more reliable near-term commitments.',impacts:{RL_1_1:+8,RS_1_1:+4,AG_1_1:-5,AM_1_3:+3},debrief:'Accuracy at the cost of agility: shorter horizon reduces forecast error but AG.1.1 falls because procurement and production lead times need longer planning windows.'},
+   ]},
+  {id:'s11',title:'The Local vs. Global Paradox — Everyone Wins, Company Bleeds',cat:'Systemic',process:'Orchestrate',tags4P:['Performance','People','Practice'],
+   desc:'Every department at NexaFlow is green. Purchasing hit unit cost targets. Transform hit OEE targets. Logistics hit cost-per-shipment targets. And yet: Cash-to-Cash degraded 24 days. Perfect Customer Order Fulfillment is red. Margins are collapsing. The CEO mandates a diagnosis in 48 hours.',
+   affectedKpis:['RL.1.1','AM.1.1','AG.1.1','CO.1.1'],
+   insight:'Level 1 performance attributes are system-level metrics. They cannot be built bottom-up from department-level optimization. SCOR-DS is explicitly hierarchical: Level 1 KPIs govern what Level 2 and Level 3 KPIs should aim for. When departments optimize local KPIs without reference to Level 1, the system degrades predictably. There is no paradox. There is only a governance failure.',
+   decisions:[
+     {letter:'A',title:'Redesign KPI Hierarchy — Global Governs Local',desc:'Establish RL.1.1 and AM.1.1 as primary governance KPIs. All departmental KPIs become secondary.',impacts:{RL_1_1:+10,AM_1_1:+10,AG_1_1:+8,CO_1_1:+2},debrief:'Performance governance: SCOR-DS Level 1 → Level 2 → Level 3 hierarchy enforced. CO.1.1 is cost-neutral because the waste from local optimization (safety stock, expediting, penalties) often exceeds local savings.'},
+     {letter:'B',title:'Run a Cross-Functional Simulation Session',desc:'Use the simulation app to demonstrate to each department how their local optimization destroys global performance.',impacts:{AG_1_1:+12,RL_1_1:+6,AM_1_1:+5,CO_1_1:+4},debrief:'Practice dimension — the Dutch distributor model: use simulation for arbitration, not prediction. This changes the mental models that generate the process. The CEO\'s 48-hour mandate is answered here.'},
+     {letter:'C',title:'Formally Authorize Specific Local KPI Sacrifices',desc:'Executive mandate: Purchasing accepts +15% unit cost for smaller lots. Transform accepts lower OEE. In exchange, RL.1.1 and AM.1.1 targets are guaranteed.',impacts:{RL_1_1:+14,AM_1_1:+14,CO_1_1:-6,CO_1_2:-3},debrief:'The hardest — and most honest — supply chain decision. This operationalizes the CEO\'s mandate. CO.1.1 and CO.1.2 take hits because local optimization is deliberately abandoned. RL.1.1 and AM.1.1 recover dramatically.'},
+   ]},
+  {id:'s12',title:'Dock Saturation — When Fulfill and Return Collide',cat:'Disruption',process:'Fulfill → Return',tags4P:['Process','Practice','Performance'],
+   desc:'The Hub Manager\'s crisis: the central dock is blocked by pallets of non-priority product pushed from factories. A product recall has created a reverse logistics wave with no dedicated space. Priority shipments are failing. "On the dock, we don\'t see arbitrations."',
+   affectedKpis:['RL.1.1','RL.1.3','RS.1.1','CO.1.1'],
+   insight:'SCOR-DS treats Return as a fully separate macro-process requiring its own resources, KPIs, and process design. When Return flows compete with Fulfill flows for the same dock space, both degrade. The Hub Manager cannot see the upstream arbitrations because there are none — Orchestrate is absent from the dock.',
+   decisions:[
+     {letter:'A',title:'Implement Dock Appointment Scheduling with Priority Lanes',desc:'Reserve 30% of dock capacity exclusively for Priority A shipments.',impacts:{RL_1_1:+12,RS_1_1:+6,CO_1_1:-5,AG_1_1:+5},debrief:'Fulfill process design: priority lane discipline makes the Orchestrate arbitration visible at the dock level. This is exactly what the Hub Manager described needing: seeing the arbitrations in real time.'},
+     {letter:'B',title:'Outsource Reverse Logistics to Dedicated 3PL',desc:'Remove all Return flows from the central hub. Engage a reverse logistics specialist.',impacts:{RL_1_3:+15,RL_1_1:+8,CO_1_1:-12,AM_1_2:+4},debrief:'Return as a separate macro-process: RL.1.3 jumps +15 because a specialist 3PL provides proper Return infrastructure. RL.1.1 recovers because Fulfill dock capacity is freed.'},
+     {letter:'C',title:'Push Back Upstream — Halt Non-Priority Transform Output',desc:'Mandate that factories stop shipping non-priority product for 2 weeks until the dock clears.',impacts:{RL_1_1:+10,RS_1_1:+4,CO_1_2:-4,AG_1_1:-5},debrief:'Cross-process signal: this demonstrates that Fulfill has both the right and the data to influence Transform scheduling. This is Orchestrate feedback in action.'},
+   ]},
+  {id:'s13',title:'Supplier Ecosystem Under Paradoxical Injunctions',cat:'Sustainability',process:'Source → Enable',tags4P:['People','Practice','Performance'],
+   desc:'NexaFlow demands maximum agility from suppliers (48h delivery windows) while also demanding 90-day payment extension. Two critical Tier-1 suppliers have signaled they may exit. The RSE officer: "How long can we claim a responsible value chain when our paradoxical demands destroy supplier health?"',
+   affectedKpis:['RL.1.2','AG.1.1','AM.1.1','AM.1.4'],
+   insight:'SCOR-DS Enable explicitly includes supply chain risk management, sustainability, and ecosystem health as core supply chain functions. The paradoxical injunction (be agile AND accept delayed payment) is a governance failure. Organizations that extract performance from financially stressed suppliers are building a fragile network.',
+   decisions:[
+     {letter:'A',title:'Supply Chain Finance — Early Payment for Critical Suppliers',desc:'Offer critical suppliers early payment at a slight discount via an SCF program.',impacts:{RL_1_2:+12,AG_1_1:+8,AM_1_1:+6,AM_1_4:-3},debrief:'Enable practice — win-win financial design: SCF programs create value by connecting supplier cash needs with bank financing. RL.1.2 improves because financially healthy suppliers deliver reliably.'},
+     {letter:'B',title:'Tiered Supplier Strategy by Criticality',desc:'Critical/sole-source suppliers get 30-day terms and planning visibility. Non-critical stay on standard terms.',impacts:{RL_1_2:+8,AG_1_1:+6,CO_1_1:+2,AM_1_1:+4},debrief:'Source segmentation applied to relationship management: critical suppliers with no alternatives deserve better terms because their failure is NexaFlow\'s failure.'},
+     {letter:'C',title:'Rebalance Agility Expectations',desc:'Accept longer lead times for standard SKUs, preserving 48h agility only for genuinely critical items.',impacts:{RL_1_2:+5,CO_1_2:+4,AG_1_1:-8,RS_1_2:+8},debrief:'Agility-reliability trade-off: AG.1.1 falls because the agility ceiling is explicitly lowered. But RL.1.2 and CO.1.2 improve because suppliers can plan more efficiently. A transparent, governable choice.'},
+   ]},
+  {id:'s14',title:'Simulation for Arbitration — The Dutch Model',cat:'Technology',process:'Orchestrate → Enable',tags4P:['Practice','People','Process','Performance'],
+   desc:'A Dutch distribution partner deliberately degrades machine yields in Transform when they know it protects downstream flow to the customer. They use data to sacrifice local performance for global performance — consciously. NexaFlow has the same simulation tool. How should it be repurposed?',
+   affectedKpis:['RL.1.1','AG.1.1','AM.1.1','CO.1.1'],
+   insight:'The distinction between simulation as prediction and simulation as arbitration is the core SCOR-DS Orchestrate capability. When the simulation tool outputs global flow impact rather than local efficiency metrics, every functional decision becomes anchored to system performance. This is SCOR-DS working as designed.',
+   decisions:[
+     {letter:'A',title:'Reprogram Simulation Outputs — System Health Score',desc:'Add a global flow impact score to every simulation output. Every planning decision shows its effect on RL.1.1 and AM.1.1.',impacts:{RL_1_1:+10,AG_1_1:+8,AM_1_1:+6,CO_1_1:+3},debrief:'Orchestrate + Enable convergence: the simulation becomes an arbitration engine when its outputs are designed around global flow constraints. CO.1.1 improves because cross-functional waste is reduced by better planning.'},
+     {letter:'B',title:'Pilot Arbitration Model in One Factory',desc:'One factory deliberately accepts lower OEE when simulation shows this protects RL.1.1 downstream. 3-month pilot.',impacts:{RL_1_1:+14,AM_1_2:-5,CO_1_2:-3,AG_1_1:+5},debrief:'The Dutch model in practice: AM.1.2 takes a hit because OEE is deliberately lowered. RL.1.1 recovers +14 points. This is the CEO\'s mandate made operational: evidence that global performance requires local sacrifice.'},
+     {letter:'C',title:'Train All Functional Leaders on the Simulation Tool',desc:'Comprehensive training so every domain leader understands arbitration outputs and can self-regulate decisions.',impacts:{AG_1_1:+10,RL_1_1:+6,CO_1_1:+4,AM_1_3:+5},debrief:'People dimension: tools do not create alignment — people do. This transforms a reporting tool into a strategic arbitration instrument. The simulation works; the people are not yet using it as designed.'},
+     {letter:'D',title:'Mandate Simulation-Based Arbitration for All Cross-Functional Decisions',desc:'No sourcing, production, or fulfillment decision above a threshold is made without a simulation output showing global KPI impact.',impacts:{RL_1_1:+8,AG_1_1:+6,AM_1_1:+8,CO_1_1:+5},debrief:'Process institutionalization: the Orchestrate macro-process fully activated as governance. Highest change management challenge, highest systemic impact. NexaFlow\'s 48-hour mandate delivered as permanent architecture.'},
+   ]},
+];
+
+/* ══════════════════════════════════════════
+   GAME STATE
+══════════════════════════════════════════ */
+const TEAM_COLORS_HEX = ['#f5a623','#00c9a7','#a29bfe','#ff6b81'];
+const TEAM_COLOR_VALS = [
+  {bg:'var(--t1)',dim:'var(--t1d)',hex:'#f5a623'},
+  {bg:'var(--t2)',dim:'var(--t2d)',hex:'#00c9a7'},
+  {bg:'var(--t3)',dim:'var(--t3d)',hex:'#a29bfe'},
+  {bg:'var(--t4)',dim:'var(--t4d)',hex:'#ff6b81'},
+];
+
+let G = {
+  focusKpi:null, teamCount:2, teams:[], totalRounds:5,
+  currentRound:1, currentTeamIdx:0, scenarioQueue:[],
+  currentScenario:null, selectedDecision:null,
+  phase:'team-turn', teamDecisions:[],
+  difficulty:'easy',
+  scoreHistory:[], kpiHistory:{}, roundHistory:[],
+};
+let setupTeamCount=2, setupRounds=5, setupDifficulty='easy';
+let scoreChartObj=null, focusKpiChartObj=null;
+
+/* ══════════════════════════════════════════
+   PERSISTENCE — localStorage for custom data
+══════════════════════════════════════════ */
+function loadData(){
+  try{
+    const k=localStorage.getItem('scorKpis');
+    const s=localStorage.getItem('scorScenarios');
+    if(k) KPI_DATA=JSON.parse(k);
+    if(s) SCENARIOS=JSON.parse(s);
+  }catch(e){}
+}
+function saveData(){
+  localStorage.setItem('scorKpis',JSON.stringify(KPI_DATA));
+  localStorage.setItem('scorScenarios',JSON.stringify(SCENARIOS));
+}
+function saveGameState(){
+  localStorage.setItem('scorGameState',JSON.stringify({G,lang}));
+  toast(t('gameSaved'));
+}
+function loadGameState(){
+  const saved=localStorage.getItem('scorGameState');
+  if(!saved){toast(t('noSavedGame'));return;}
+  try{
+    const data=JSON.parse(saved);
+    Object.assign(G,data.G);
+    if(data.lang) lang=data.lang;
+    showScreen('game');
+    buildRoundDots(); renderScoreboard();
+    document.getElementById('focusKpiName').textContent=getKpi(G.focusKpi)?.name||G.focusKpi;
+    loadRound();
+    refreshAllUI();
+    toast(t('gameLoaded'));
+  }catch(e){toast('Load failed: '+e.message);}
 }
 
 /* ══════════════════════════════════════════
@@ -866,375 +907,379 @@ function showScreen(id){
 }
 
 /* ══════════════════════════════════════════
-   SETUP (Enhanced)
+   THEME
 ══════════════════════════════════════════ */
-const KPI_CATEGORIES = {
+function toggleTheme(){
+  document.body.classList.toggle('light-mode');
+}
+
+/* ══════════════════════════════════════════
+   SCOR MAP
+══════════════════════════════════════════ */
+const SCOR_STEPS = [
+  {key:'Orchestrate',desc_en:'The integration layer aligning demand, supply, and capacity across all domains.',desc_fr:'La couche d\'intégration alignant demande, offre et capacité.'},
+  {key:'Source',desc_en:'Identifying, evaluating, and selecting suppliers and inbound resources.',desc_fr:'Identifier, évaluer et sélectionner les fournisseurs.'},
+  {key:'Transform',desc_en:'Converting raw materials and components into finished goods or services.',desc_fr:'Transformer les matières premières en produits finis.'},
+  {key:'Order',desc_en:'Receiving, validating, and processing customer orders.',desc_fr:'Recevoir, valider et traiter les commandes clients.'},
+  {key:'Fulfill',desc_en:'Delivering products or services to customers.',desc_fr:'Livrer les produits ou services aux clients.'},
+  {key:'Return',desc_en:'Handling product returns and managing reverse logistics.',desc_fr:'Gérer les retours produits et la logistique inverse.'},
+  {key:'Enable',desc_en:'Providing infrastructure, governance, and support to supply chain operations.',desc_fr:'Fournir l\'infrastructure et la gouvernance de la chaîne.'},
+];
+function buildScorMap(){
+  const el=document.getElementById('scorMap');
+  let html='';
+  SCOR_STEPS.forEach((s,i)=>{
+    const desc=lang==='fr'?s.desc_fr:s.desc_en;
+    if(i>0) html+=`<div class="scor-step">→</div>`;
+    html+=`<div class="tooltip"><div class="scor-step highlight">${s.key}</div><span class="tt">${desc}</span></div>`;
+  });
+  el.innerHTML=html;
+}
+
+/* ══════════════════════════════════════════
+   SETUP
+══════════════════════════════════════════ */
+const KPI_CATEGORIES={
   RL:{label:'Reliability',color:'#f5a623'},
   RS:{label:'Responsiveness',color:'#00c9a7'},
   AG:{label:'Agility',color:'#a29bfe'},
   CO:{label:'Cost',color:'#ff6b81'},
   AM:{label:'Asset Management',color:'#2ed573'},
 };
-
 function buildKpiPicker(){
-  const cats = [...new Set(KPI_DATA.map(k=>k.cat))];
-  const container = document.getElementById('kpiPicker');
-  container.innerHTML = '';
+  const cats=[...new Set(KPI_DATA.map(k=>k.cat))];
+  const container=document.getElementById('kpiPicker');
+  container.innerHTML='';
   cats.forEach(cat=>{
-    const kpis = KPI_DATA.filter(k=>k.cat===cat);
-    const catInfo = KPI_CATEGORIES[cat]||{label:cat,color:'var(--amber)'};
-    const div = document.createElement('div');
+    const kpis=KPI_DATA.filter(k=>k.cat===cat);
+    const ci=KPI_CATEGORIES[cat]||{label:cat,color:'var(--amber)'};
+    const div=document.createElement('div');
     div.className='kpi-category';
-    div.innerHTML=`<span class="kpi-cat-label" style="border-color:${catInfo.color};color:${catInfo.color}">${catInfo.label} (${cat})</span>
-      <div class="kpi-chips">${kpis.map(k=>`<div class="kpi-chip tooltip" data-code="${k.code}" onclick="selectKpi('${k.code}')"><span>${k.code} — ${k.name.length>30?k.name.substring(0,30)+'…':k.name}</span><span class="tooltiptext">${k.desc}</span></div>`).join('')}</div>`;
+    div.innerHTML=`<span class="kpi-cat-label" style="border-color:${ci.color};color:${ci.color}">${ci.label} (${cat})</span>
+      <div class="kpi-chips">${kpis.map(k=>`<div class="tooltip kpi-chip" data-code="${k.code}" onclick="selectKpi('${k.code}')"><span>${k.code} — ${k.name.length>30?k.name.substring(0,30)+'…':k.name}</span><span class="tt">${escapeHtml(k.desc)}</span></div>`).join('')}</div>`;
     container.appendChild(div);
   });
+  // Re-apply selection
+  if(G.focusKpi) document.querySelectorAll('.kpi-chip').forEach(c=>c.classList.toggle('selected',c.dataset.code===G.focusKpi));
 }
-
 function selectKpi(code){
-  G.focusKpi = code;
-  document.querySelectorAll('.kpi-chip').forEach(c=>{
-    c.classList.toggle('selected', c.dataset.code===code);
-  });
+  G.focusKpi=code;
+  document.querySelectorAll('.kpi-chip').forEach(c=>c.classList.toggle('selected',c.dataset.code===code));
 }
-
-let setupTeamCount = 2;
-let setupRounds = 5;
-let setupDifficulty = 'easy';
-
 function setTeamCount(n){
-  setupTeamCount = n;
+  setupTeamCount=n;
   document.querySelectorAll('.tc-btn').forEach((b,i)=>b.classList.toggle('active',i===n-1));
   for(let i=0;i<4;i++) document.getElementById('twrap-'+i).classList.toggle('show',i<n);
-  G.aiEnabled = n === 1;
 }
-
-function setRounds(n, btn){
-  setupRounds = n;
+function setRounds(n,btn){
+  setupRounds=n;
   document.querySelectorAll('.round-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
-
-function setDifficulty(d, btn){
-  setupDifficulty = d;
+function setDifficulty(d,btn){
+  setupDifficulty=d;
   document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
 }
-
 function startGame(){
-  if(!G.focusKpi){toast('Please select a Focus KPI first');return;}
-  const teamColors=[{bg:'var(--t1)',dim:'var(--t1d)'},{bg:'var(--t2)',dim:'var(--t2d)'},{bg:'var(--t3)',dim:'var(--t3d)'},{bg:'var(--t4)',dim:'var(--t4d)'}];
-  G.teamCount = setupTeamCount;
-  G.totalRounds = setupRounds;
-  G.difficulty = setupDifficulty;
-  G.currentRound = 1;
-  G.currentTeamIdx = 0;
-  G.teamDecisions = [];
-  G.roundHistory = [];
-  G.scoreHistory = Array.from({length:G.teamCount}, () => []);
-  G.kpiHistory = {};
-  KPI_DATA.forEach(k => G.kpiHistory[k.code] = Array.from({length:G.teamCount}, () => []));
-  G.teams = Array.from({length:setupTeamCount},(_,i)=>({
-    idx:i,
-    name:document.getElementById('tname-'+i).value.trim()||`Team ${i+1}`,
-    color:teamColors[i],
-    score:0,
-    kpiScores:{},
-    isAI: G.aiEnabled && i > 0
-  }));
-  G.teams.forEach(t=>{
-    KPI_DATA.forEach(k=>{t.kpiScores[k.code]=k.baseline;});
-  });
+  if(!G.focusKpi){toast(t('selectFocusFirst'));return;}
+  
+  // 1. Core Settings
+  G.teamCount=setupTeamCount; G.totalRounds=setupRounds; G.difficulty=setupDifficulty;
+  G.currentRound=1; G.currentTeamIdx=0; G.teamDecisions=[];
+  G.roundHistory=[];
 
-  const pool=[...SCENARIOS].sort(()=>Math.random()-.5);
-  G.scenarioQueue=[];
-  let pool2 = [];
-  for(let i=0;i<G.totalRounds;i++){
-    if(pool2.length===0) pool2=[...SCENARIOS].sort(()=>Math.random()-.5);
-    G.scenarioQueue.push(pool2.shift());
+  // 2. Initialize Histories ONCE
+  G.scoreHistory = Array.from({length: G.teamCount}, () => [0]); 
+  G.kpiHistory = {};
+  if (G.focusKpi) {
+    const kd = getKpi(G.focusKpi);
+    const baseline = kd ? kd.baseline : 0;
+    G.kpiHistory[G.focusKpi] = Array.from({length: G.teamCount}, () => [baseline]);
   }
 
+  // 3. Init Teams
+  G.teams=Array.from({length:setupTeamCount},(_,i)=>({
+    idx:i,
+    name:escapeHtml(document.getElementById('tname-'+i).value.trim()||`Team ${i+1}`),
+    color:TEAM_COLOR_VALS[i],
+    score:0, kpiScores:{},
+    isAI: setupTeamCount===1 && i>0
+  }));
+  G.teams.forEach(team=>KPI_DATA.forEach(k=>{team.kpiScores[k.code]=k.baseline;}));
+
+  // 4. Build Smart Queue (Prioritize Focus KPI)
+  let priorityPool = SCENARIOS.filter(s => s.affectedKpis.includes(G.focusKpi)).sort(() => Math.random() - 0.5);
+  let standardPool = SCENARIOS.filter(s => !s.affectedKpis.includes(G.focusKpi)).sort(() => Math.random() - 0.5);
+  
+  G.scenarioQueue = [];
+  
+  for (let i = 0; i < G.totalRounds; i++) {
+    if (priorityPool.length > 0) {
+      G.scenarioQueue.push(priorityPool.shift());
+    } else if (standardPool.length > 0) {
+      G.scenarioQueue.push(standardPool.shift());
+    } else {
+      // Fallback: if total rounds exceed total unique scenarios, re-fill pools
+      priorityPool = SCENARIOS.filter(s => s.affectedKpis.includes(G.focusKpi)).sort(() => Math.random() - 0.5);
+      standardPool = SCENARIOS.filter(s => !s.affectedKpis.includes(G.focusKpi)).sort(() => Math.random() - 0.5);
+      G.scenarioQueue.push(priorityPool.length > 0 ? priorityPool.shift() : standardPool.shift());
+    }
+  }
+  
+  // Final shuffle so priority scenarios aren't always front-loaded
+  G.scenarioQueue.sort(() => Math.random() - 0.5);
+
   showScreen('game');
-  buildRoundDots();
-  renderScoreboard();
-  document.getElementById('focusKpiName').textContent = getKpi(G.focusKpi)?.name || G.focusKpi;
+  buildRoundDots(); renderScoreboard();
+  document.getElementById('focusKpiName').textContent=getKpi(G.focusKpi)?.name||G.focusKpi;
+  document.getElementById('lb-focusKpiPts').textContent=t('focusKpiPts');
+  addHistoryEntry(`Game started — ${G.totalRounds} rounds — ${t(G.difficulty)} — ${G.teams.map(t=>t.name).join(', ')}`);
   loadRound();
-  updateHistory('Game started with difficulty: ' + G.difficulty);
 }
 
 function getKpi(code){return KPI_DATA.find(k=>k.code===code);}
 
 /* ══════════════════════════════════════════
-   THEME TOGGLE
-══════════════════════════════════════════ */
-function toggleTheme() {
-  G.theme = G.theme === 'dark' ? 'light' : 'dark';
-  document.body.classList.toggle('light-mode', G.theme === 'light');
-}
-
-/* ══════════════════════════════════════════
    ROUND DOTS
 ══════════════════════════════════════════ */
 function buildRoundDots(){
-  const wrap = document.getElementById('roundDots');
-  wrap.innerHTML = Array.from({length:G.totalRounds},(_,i)=>
+  document.getElementById('roundDots').innerHTML=Array.from({length:G.totalRounds},(_,i)=>
     `<div class="rt-dot ${i===0?'current':''}" id="rdot-${i}">${i+1}</div>`).join('');
 }
 function updateRoundDots(){
   for(let i=0;i<G.totalRounds;i++){
-    const d=document.getElementById('rdot-'+i);if(!d)return;
-    if(i<G.currentRound-1) d.className='rt-dot done';
-    else if(i===G.currentRound-1) d.className='rt-dot current';
-    else d.className='rt-dot';
+    const d=document.getElementById('rdot-'+i); if(!d) continue;
+    d.className=`rt-dot${i<G.currentRound-1?' done':i===G.currentRound-1?' current':''}`;
   }
 }
 
 /* ══════════════════════════════════════════
-   LOAD ROUND (Enhanced with difficulty scaling)
+   LOAD ROUND
 ══════════════════════════════════════════ */
 function loadRound(){
-  G.currentScenario = G.scenarioQueue[G.currentRound-1];
-  // Scale impacts based on difficulty
-  const scale = G.difficulty === 'easy' ? 0.8 : G.difficulty === 'hard' ? 1.2 : 1;
-  G.currentScenario.decisions.forEach(d => {
-    Object.keys(d.impacts).forEach(k => d.impacts[k] *= scale);
-  });
-  G.currentTeamIdx = 0;
-  G.teamDecisions = [];
-  G.selectedDecision = null;
-  G.phase = 'team-turn';
-  updateRoundDots();
-  renderTurn();
+  G.currentScenario=G.scenarioQueue[G.currentRound-1];
+  G.currentTeamIdx=0; G.teamDecisions=[]; G.selectedDecision=null; G.phase='team-turn';
+  updateRoundDots(); renderTurn();
 }
 
 function renderTurn(){
-  const team = G.teams[G.currentTeamIdx];
-  const sc = G.currentScenario;
+  const team=G.teams[G.currentTeamIdx];
+  const sc=G.currentScenario;
+  document.getElementById('gameMeta').textContent=`${t('roundsSection').replace('🔄 ','').replace('Nombre de ','Round ')} ${G.currentRound}/${G.totalRounds} · ${team.name}`;
+  document.getElementById('ghPhase').textContent=`ROUND ${G.currentRound} — ${t('teamDecision')}`;
+  document.getElementById('ghTurn').innerHTML=`<span style="color:${team.color.bg}">${team.name}</span> — ${t('strategicOptions').replace('Strategic Options','Choose Your Strategy').replace('Options Stratégiques','Choisissez votre stratégie')}`;
+  document.getElementById('cbHint').textContent=t('selectDecision');
+  const btn=document.getElementById('confirmBtn');
+  btn.disabled=true; btn.className='confirm-btn'; btn.textContent=t('confirmDecision'); btn.onclick=confirmDecision;
+  G.selectedDecision=null;
+  G.teams.forEach((t,i)=>{const c=document.getElementById('tscard-'+i);if(c)c.classList.toggle('current-turn',i===G.currentTeamIdx);});
 
-  document.getElementById('gameMeta').textContent = `Round ${G.currentRound} of ${G.totalRounds} · ${team.name}'s Turn (Difficulty: ${G.difficulty})`;
-  document.getElementById('ghPhase').textContent = `ROUND ${G.currentRound} — TEAM DECISION`;
-  document.getElementById('ghTurn').innerHTML = `<span style="color:${team.color.bg}">${team.name}</span> — Choose Your Strategy`;
-  document.getElementById('cbHint').textContent = 'SELECT A DECISION TO CONTINUE';
-  document.getElementById('confirmBtn').disabled = true;
-  document.getElementById('confirmBtn').className = 'confirm-btn';
-  document.getElementById('confirmBtn').textContent = 'Confirm Decision';
-  document.getElementById('confirmBtn').onclick = confirmDecision;
-  G.selectedDecision = null;
+  const tags4P=sc.tags4P||[];
+  const tagHtml=tags4P.map(p=>`<span class="sc-4p-tag tag-${p.toLowerCase()}">${p}</span>`).join('');
+  const diffBadge=`<span class="sc-difficulty">${t(G.difficulty)} ×${G.difficulty==='easy'?'0.8':G.difficulty==='hard'?'1.2':'1.0'}</span>`;
 
-  G.teams.forEach((t,i)=>{
-    const c=document.getElementById('tscard-'+i);
-    if(c) c.classList.toggle('current-turn',i===G.currentTeamIdx);
-  });
-
-  const tags4P = sc.tags4P||[];
-  const tagHtml = tags4P.map(t=>`<span class="sc-4p-tag tag-${t.toLowerCase()}">${t}</span>`).join('');
-
-  const content = document.getElementById('contentArea');
-  content.innerHTML = `
+  document.getElementById('contentArea').innerHTML=`
     <div class="scenario-card">
       <div class="sc-header">
-        <span class="tooltip"><span class="sc-cat">
-        ${sc.cat}</span><span class="tooltiptext">Category: ${sc.cat} - Describes the type of supply chain event (e.g., Disruption means unexpected interruptions).</span></span>
-        ${sc.process?`<span class="tooltip"><span class="sc-process">${sc.process}</span><span class="tooltiptext">Process Domain: ${sc.process} - Maps to SCOR-DS macro-processes like Orchestrate (planning) or Source (procurement).</span></span>`:''}
+        <span class="tooltip"><span class="sc-cat">${escapeHtml(sc.cat)}</span><span class="tt">Category: ${escapeHtml(sc.cat)}</span></span>
+        ${sc.process?`<span class="tooltip"><span class="sc-process">${escapeHtml(sc.process)}</span><span class="tt">SCOR-DS domain: ${escapeHtml(sc.process)}</span></span>`:''}
+        ${diffBadge}
         <span class="sc-round">Round ${G.currentRound}</span>
-        <h2 class="sc-title">${sc.title}</h2>
+        <h2 class="sc-title">${escapeHtml(sc.title)}</h2>
       </div>
       <div class="sc-body">${sc.desc}</div>
-      ${tagHtml?`<div class="sc-4p"><span class="label" style="color:var(--muted);font-size:.48rem;margin-right:.4rem;">4P:</span>${tagHtml}</div>`:''}
+      ${tagHtml?`<div class="sc-4p"><span class="label" style="font-size:.48rem;margin-right:.4rem;">4P:</span>${tagHtml}</div>`:''}
       <div class="sc-impact-preview">
-        <span class="label" style="width:100%;margin-bottom:.3rem;">KPIs AFFECTED THIS ROUND</span>
+        <span class="label" style="width:100%;margin-bottom:.3rem;">${t('kpisAffected')}</span>
         ${sc.affectedKpis.map(k=>`<span class="sip-chip ${k===G.focusKpi?'focus':'affected'}">${k}${k===G.focusKpi?' ★':''}</span>`).join('')}
       </div>
     </div>
-    <div class="decisions-title">Strategic Options</div>
-    <div class="decisions-grid">
-      ${sc.decisions.map((d,di)=>renderDecisionCard(d,di)).join('')}
-    </div>`;
-  if (team.isAI) aiMakeDecision();
+    <div class="decisions-title">${t('strategicOptions')}</div>
+    <div class="decisions-grid">${sc.decisions.map((d,di)=>renderDecisionCard(d,di)).join('')}</div>`;
+
+  if(team.isAI) setTimeout(()=>aiMakeDecision(),600);
 }
 
 function renderDecisionCard(d,di){
-  const impacts = Object.entries(d.impacts);
-  const impactHtml = impacts.map(([k,v])=>{
-    const kcode = k.replace(/_/g,'.');
-    const isFocus = kcode===G.focusKpi;
-    const cls = v>0?'pos':v<0?'neg':'neu';
+  const impacts=Object.entries(d.impacts);
+  // Show raw (unscaled) values to player — scaling happens at scoring
+  const impHtml=impacts.map(([k,v])=>{
+    const kcode=k.replace(/_/g,'.');
+    const isFocus=kcode===G.focusKpi;
+    const cls=v>0?'pos':v<0?'neg':'neu';
     return `<span class="dc-impact ${cls}">${kcode}: ${v>0?'+':''}${v}${isFocus?' ★ (×2)':''}</span>`;
   }).join('');
   return `<div class="decision-card" id="dcard-${di}" onclick="selectDecision(${di})">
     <div class="dc-letter">${d.letter}</div>
-    <div class="dc-title">${d.title}</div>
+    <div class="dc-title">${escapeHtml(d.title)}</div>
     <div class="dc-desc">${d.desc}</div>
-    <div class="dc-impacts">${impactHtml}</div>
+    <div class="dc-impacts">${impHtml}</div>
   </div>`;
 }
 
 function selectDecision(di){
-  G.selectedDecision = di;
+  G.selectedDecision=di;
   document.querySelectorAll('.decision-card').forEach((c,i)=>c.classList.toggle('selected',i===di));
-  document.getElementById('cbHint').textContent = `DECISION ${G.currentScenario.decisions[di].letter} SELECTED — CONFIRM TO LOCK IN`;
-  const btn = document.getElementById('confirmBtn');
-  btn.disabled = false;
-  btn.className = 'confirm-btn ready';
-  btn.textContent = `Lock In: Option ${G.currentScenario.decisions[di].letter}`;
+  document.getElementById('cbHint').textContent=t('decisionSelected',G.currentScenario.decisions[di].letter);
+  const btn=document.getElementById('confirmBtn');
+  btn.disabled=false; btn.className='confirm-btn ready';
+  btn.textContent=t('lockIn',G.currentScenario.decisions[di].letter);
 }
 
-function aiMakeDecision() {
-  let di = 0;
-  let bestScore = -Infinity;
-  G.currentScenario.decisions.forEach((d, index) => {
-    let score = Object.values(d.impacts).reduce((sum, v) => sum + v, 0);
-    if (G.difficulty === 'hard') score += Math.random() * 10; // Bias towards better
-    if (score > bestScore) { bestScore = score; di = index; }
+/* ══════════════════════════════════════════
+   AI OPPONENT — picks highest global-flow
+   impact (sum of effectiveV, not raw v)
+══════════════════════════════════════════ */
+function aiMakeDecision(){
+  const sc=G.currentScenario;
+  let bestDi=0, bestScore=-Infinity;
+  sc.decisions.forEach((d,di)=>{
+    const score=Object.entries(d.impacts).reduce((sum,[k,v])=>{
+      const kcode=k.replace(/_/g,'.');
+      const kd=getKpi(kcode);
+      return sum+(kd&&kd.dir===-1?-v:v);
+    },0);
+    if(score>bestScore){bestScore=score;bestDi=di;}
   });
-  selectDecision(di);
+  selectDecision(bestDi);
   confirmDecision();
-  toast(`${G.teams[G.currentTeamIdx].name} (AI) selected Option ${G.currentScenario.decisions[di].letter}`);
+  toast(`${G.teams[G.currentTeamIdx-1]?.name||'AI'} ${t('aiLabel')} → ${sc.decisions[bestDi].letter}`);
 }
 
 function confirmDecision(){
   if(G.selectedDecision===null) return;
-  const d = G.currentScenario.decisions[G.selectedDecision];
-  G.teamDecisions.push({teamIdx:G.currentTeamIdx, decision:d});
-
-  if(G.currentTeamIdx < G.teamCount-1){
+  const d=G.currentScenario.decisions[G.selectedDecision];
+  G.teamDecisions.push({teamIdx:G.currentTeamIdx,decision:d});
+  if(G.currentTeamIdx<G.teamCount-1){
+    const prev=G.teams[G.currentTeamIdx].name;
     G.currentTeamIdx++;
-    G.selectedDecision = null;
+    G.selectedDecision=null;
     renderTurn();
-    toast(`✓ ${G.teams[G.currentTeamIdx-1].name} decision locked. ${G.teams[G.currentTeamIdx].name} — your turn.`);
+    toast(t('teamDecisionLocked',prev,G.teams[G.currentTeamIdx].name));
   } else {
     revealResults();
   }
 }
 
 /* ══════════════════════════════════════════
-   REVEAL (Enhanced)
+   REVEAL — Fixed: difficulty scaling applied
+   here at scoring time only (never mutates
+   scenario data)
 ══════════════════════════════════════════ */
 function revealResults(){
-  G.phase = 'reveal';
-  document.getElementById('ghPhase').textContent = `ROUND ${G.currentRound} — RESULTS & DEBRIEF`;
-  document.getElementById('ghTurn').textContent = 'All Decisions Revealed';
-  document.getElementById('cbHint').textContent = G.currentRound<G.totalRounds ? 'REVIEW & DISCUSS — ADVANCE TO NEXT ROUND' : 'VIEW FINAL STANDINGS';
-  document.getElementById('confirmBtn').disabled = false;
-  document.getElementById('confirmBtn').className = 'confirm-btn ready';
-  document.getElementById('confirmBtn').textContent = G.currentRound<G.totalRounds ? `Next Round (${G.currentRound+1}/${G.totalRounds}) →` : 'View Final Results →';
-  document.getElementById('confirmBtn').onclick = G.currentRound<G.totalRounds ? advanceRound : showFinalResults;
+  G.phase='reveal';
+  document.getElementById('ghPhase').textContent=`ROUND ${G.currentRound} — ${t('resultsDebrief')}`;
+  document.getElementById('ghTurn').textContent=t('allRevealed');
+  document.getElementById('cbHint').textContent=G.currentRound<G.totalRounds?t('reviewDiscuss'):t('viewFinal');
+  const btn=document.getElementById('confirmBtn');
+  btn.disabled=false; btn.className='confirm-btn ready';
+  btn.textContent=G.currentRound<G.totalRounds?`${t('nextRound')} (${G.currentRound+1}/${G.totalRounds}) →`:t('viewFinalResults');
+  btn.onclick=G.currentRound<G.totalRounds?advanceRound:showFinalResults;
 
-  let revealHtml = `<div class="scenario-card">
-    <div class="sc-header">
-      <span class="tooltip"><span class="sc-cat">
-      ${G.currentScenario.cat}</span><span class="tooltiptext">Category: ${G.currentScenario.cat} - Describes the type of supply chain event (e.g., Disruption means unexpected interruptions).</span></span>
-      ${G.currentScenario.process?`<span class="tooltip"><span class="sc-process">${G.currentScenario.process}</span><span class="tooltiptext">Process Domain: ${G.currentScenario.process} - Maps to SCOR-DS macro-processes like Orchestrate (planning) or Source (procurement).</span></span>`:''}
-      <span class="sc-round">Round ${G.currentRound} — Reveal</span>
-      <h2 class="sc-title">${G.currentScenario.title}</h2>
-    </div>
-  </div>
-  <div class="decisions-title">Team Decisions, KPI Impact & SCOR-DS Insights</div>
+  // Difficulty scale — applied AT SCORING TIME only
+  const diffScale=G.difficulty==='easy'?0.8:G.difficulty==='hard'?1.2:1.0;
+
+  let html=`<div class="scenario-card"><div class="sc-header">
+    ${G.currentScenario.process?`<span class="sc-process">${escapeHtml(G.currentScenario.process)}</span>`:''}
+    <span class="sc-round">Round ${G.currentRound} — Reveal</span>
+    <h2 class="sc-title">${escapeHtml(G.currentScenario.title)}</h2>
+  </div></div>
+  <div class="decisions-title">${t('resultsDebrief').replace(' & DEBRIEF','').replace(' & DÉBRIEF','')}: ${t('strategicOptions')}</div>
   <div class="decisions-grid">`;
 
-  let roundSummary = `Round ${G.currentRound}: `;
+  let roundSummary=`R${G.currentRound}: `;
   G.teamDecisions.forEach(({teamIdx,decision})=>{
-    const team = G.teams[teamIdx];
-    let roundScore = 0;
-    const impactDetails = Object.entries(decision.impacts).map(([k,v])=>{
+    const team=G.teams[teamIdx];
+    let roundScore=0;
+    const impDetails=Object.entries(decision.impacts).map(([k,v])=>{
       const kcode=k.replace(/_/g,'.');
+      const kd=getKpi(kcode);
+      if(!kd) return '';
+      // Apply difficulty scale
+      const scaledV=Math.round(v*diffScale);
+      const effectiveV=(kd.dir===-1)?-scaledV:scaledV;
       const isFocus=kcode===G.focusKpi;
-      const kpiDef=getKpi(kcode);
-      const effectiveV = (kpiDef && kpiDef.dir===-1) ? -v : v;
-      const pts = isFocus ? effectiveV*2 : effectiveV;
+      const pts=isFocus?effectiveV*2:effectiveV;
       roundScore+=pts;
-
-      const currentVal = team.kpiScores[kcode] || kpiDef.baseline;
-      const newVal = Math.max(kpiDef.min, Math.min(kpiDef.max, currentVal + v));
-      team.kpiScores[kcode] = newVal;
-
+      // Apply bounds to KPI score
+      const cur=team.kpiScores[kcode]??kd.baseline;
+      team.kpiScores[kcode]=Math.max(kd.min,Math.min(kd.max,cur+scaledV));
       const cls=pts>0?'pos':pts<0?'neg':'neu';
-      return `<span class="dc-impact ${cls}">${kcode}: ${v>0?'+':''}${v}${isFocus?` ★ (×2, ${pts>0?'+':''}${Math.round(pts)}pts)`:''}</span>`;
+      return `<span class="dc-impact ${cls}">${kcode}: ${scaledV>0?'+':''}${scaledV}${isFocus?` ★ (×2, ${pts>0?'+':''}${Math.round(pts)}pts)`:''}</span>`;
     }).join('');
-
-    team.score += Math.round(roundScore);
+    team.score+=Math.round(roundScore);
     G.scoreHistory[teamIdx].push(team.score);
-    G.currentScenario.affectedKpis.forEach(code => G.currentScenario.affectedKpis.forEach(code => {
-      const key = code.replace('.', '_');
-      if (!G.kpiHistory[key]) G.kpiHistory[key] = Array.from({length: G.teamCount}, () => []);
-      G.kpiHistory[key][teamIdx].push(team.kpiScores[key] || getKpi(code).baseline);
-    }));
+    // Track focus KPI history safely
+    if (G.focusKpi && G.kpiHistory[G.focusKpi]) {
+      const kd = getKpi(G.focusKpi);
+      const fallback = kd ? kd.baseline : 0;
+      G.kpiHistory[G.focusKpi][teamIdx].push(team.kpiScores[G.focusKpi] ?? fallback);
+    }
+    roundSummary+=`${team.name}: ${decision.letter} (${roundScore>=0?'+':''}${Math.round(roundScore)}pts) `;
 
-    roundSummary += `${team.name} chose ${decision.letter} (+${roundScore} pts); `;
+    const debriefHtml=decision.debrief?`<div class="debrief-box"><div class="debrief-label">${t('scorInsight')}</div><div class="debrief-text">${decision.debrief}</div></div>`:'';
 
-    const debriefHtml = decision.debrief ? `
-      <div class="debrief-box">
-        <div class="debrief-label">SCOR-DS Insight</div>
-        <div class="debrief-text">${decision.debrief}</div>
-      </div>` : '';
-
-    revealHtml+=`<div class="decision-card selected" style="border-color:${team.color.bg};">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.75rem;letter-spacing:.1em;color:${team.color.bg};margin-bottom:.5rem;text-transform:uppercase;">${team.name}${team.isAI ? ' (AI)' : ''}</div>
-      <div class="dc-title">${decision.letter}: ${decision.title}</div>
+    html+=`<div class="decision-card selected" style="border-color:${team.color.bg};">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.75rem;letter-spacing:.1em;color:${team.color.bg};margin-bottom:.5rem;text-transform:uppercase;">${team.name}${team.isAI?' '+t('aiLabel'):''}</div>
+      <div class="dc-title">${decision.letter}: ${escapeHtml(decision.title)}</div>
       <div class="dc-desc">${decision.desc}</div>
-      <div class="dc-impacts">${impactDetails}</div>
-      <div style="margin-top:.75rem;padding-top:.6rem;border-top:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem;color:${roundScore>=0?'var(--green)':'var(--red)'};">
-        ${roundScore>=0?'+':''}${Math.round(roundScore)} pts this round
-      </div>
+      <div class="dc-impacts">${impDetails}</div>
+      <div style="margin-top:.75rem;padding-top:.6rem;border-top:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem;color:${roundScore>=0?'var(--green)':'var(--red)'};">${roundScore>=0?'+':''}${Math.round(roundScore)} pts</div>
       ${debriefHtml}
     </div>`;
   });
-
-  revealHtml+='</div>';
+  html+='</div>';
 
   if(G.currentScenario.insight){
-    const tags4P = G.currentScenario.tags4P||[];
-    const tagHtml = tags4P.map(t=>`<span class="sc-4p-tag tag-${t.toLowerCase()}">${t}</span>`).join('');
-    revealHtml+=`
-    <div class="insight-panel">
+    const tags4P=G.currentScenario.tags4P||[];
+    const tagHtml=tags4P.map(p=>`<span class="sc-4p-tag tag-${p.toLowerCase()}">${p}</span>`).join('');
+    html+=`<div class="insight-panel">
       <div class="ip-header">
-        <span class="ip-label">Systemic Insight — Facilitator Debrief</span>
-        ${G.currentScenario.process?`<span class="ip-process">${G.currentScenario.process}</span>`:''}
+        <span class="ip-label">${t('systemicInsight')}</span>
+        ${G.currentScenario.process?`<span class="ip-process">${escapeHtml(G.currentScenario.process)}</span>`:''}
       </div>
       <div class="ip-text">${G.currentScenario.insight}</div>
       ${tagHtml?`<div class="ip-4p">${tagHtml}</div>`:''}
     </div>`;
   }
 
-  document.getElementById('contentArea').innerHTML=revealHtml;
+  document.getElementById('contentArea').innerHTML=html;
   renderScoreboard();
   G.teams.forEach((_,i)=>{const c=document.getElementById('tscard-'+i);if(c)c.classList.remove('current-turn');});
-  updateHistory(roundSummary);
+  addHistoryEntry(roundSummary);
   G.roundHistory.push(G.currentScenario.title);
 }
 
 function advanceRound(){
   document.getElementById('confirmBtn').onclick=confirmDecision;
-  G.currentRound++;
-  loadRound();
+  G.currentRound++; loadRound();
 }
 
 /* ══════════════════════════════════════════
-   SCOREBOARD (Enhanced)
+   SCOREBOARD — Fixed: uses kcode (with .)
+   to look up team.kpiScores correctly
 ══════════════════════════════════════════ */
 function renderScoreboard(){
   const sorted=[...G.teams].sort((a,b)=>b.score-a.score);
-  const sb=document.getElementById('scoreboard');
-  const kpisToShow=G.currentScenario?G.currentScenario.affectedKpis.slice(0,4):[G.focusKpi];
-
-  sb.innerHTML=G.teams.map((t,idx)=>{
+  const kpisToShow=G.currentScenario?G.currentScenario.affectedKpis.slice(0,3):[G.focusKpi].filter(Boolean);
+  document.getElementById('scoreboard').innerHTML=G.teams.map(t=>{
     const rank=sorted.findIndex(s=>s.idx===t.idx)+1;
+    const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
     const bars=kpisToShow.map(code=>{
-      const kdef=getKpi(code);if(!kdef)return'';
-      const val=t.kpiScores[code.replace('.', '_')] || kdef.baseline;
-      const pct=Math.min(100,Math.max(0,((val-kdef.min)/(kdef.max-kdef.min))*100));
-      const barColor=code===G.focusKpi?'var(--amber)':t.color.bg;
+      const kd=getKpi(code); if(!kd)return'';
+      const val=t.kpiScores[code]??kd.baseline; // use dot-notation key
+      const pct=Math.min(100,Math.max(0,((val-kd.min)/(kd.max-kd.min))*100));
+      const bc=code===G.focusKpi?'var(--amber)':t.color.bg;
       return `<div class="tsm-bar-row">
-        <div class="tsm-bar-label" title="${kdef.name}">${code}</div>
-        <div class="tsm-bar-track"><div class="tsm-bar-fill" style="width:${pct}%;background:${barColor};"></div></div>
+        <div class="tsm-bar-label" title="${kd.name}">${code}</div>
+        <div class="tsm-bar-track"><div class="tsm-bar-fill" style="width:${pct}%;background:${bc};"></div></div>
         <div class="tsm-bar-val">${Math.round(val)}</div>
       </div>`;
     }).join('');
-
-    const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
     return `<div class="team-score-card" id="tscard-${t.idx}" style="border-color:${t.color.bg}20;">
       <div class="tsm-header">
-        <span class="tsm-name" style="color:${t.color.bg}">${t.name}${t.isAI ? ' (AI)' : ''}</span>
+        <span class="tsm-name" style="color:${t.color.bg}">${t.name}${t.isAI?' '+t('aiLabel'):''}</span>
         <span class="tsm-rank" style="background:${t.color.dim};color:${t.color.bg}">${medal} #${rank}</span>
       </div>
       <div class="tsm-score" style="color:${t.color.bg}">${t.score}</div>
@@ -1247,130 +1292,150 @@ function renderScoreboard(){
 /* ══════════════════════════════════════════
    HISTORY LOG
 ══════════════════════════════════════════ */
-function updateHistory(msg) {
-  const entries = document.getElementById('historyEntries');
-  entries.innerHTML += `<div>${msg}</div>`;
-  entries.scrollTop = entries.scrollHeight;
+function addHistoryEntry(msg){
+  const el=document.getElementById('historyEntries');
+  if(!el) return;
+  el.innerHTML+=`<div>${msg}</div>`;
+  el.scrollTop=el.scrollHeight;
 }
 
 /* ══════════════════════════════════════════
-   FINAL RESULTS (Enhanced with charts)
+   FINAL RESULTS
 ══════════════════════════════════════════ */
 function showFinalResults(){
   showScreen('results');
   const sorted=[...G.teams].sort((a,b)=>b.score-a.score);
   const medals=['🥇','🥈','🥉','🏅'];
-  const rankClasses=['rank-1','rank-2','rank-3','rank-4'];
-
-  document.getElementById('podium').innerHTML=sorted.map((t,i)=>`
-    <div class="podium-card ${rankClasses[i]}" style="border-color:${t.color.bg}40;">
+  const rankCls=['rank-1','rank-2','rank-3','rank-4'];
+  
+  // FIX: Renamed the parameter 't' to 'team' so it doesn't shadow the translation function t()
+  document.getElementById('podium').innerHTML=sorted.map((team,i)=>`
+    <div class="podium-card ${rankCls[i]}" style="border-color:${team.color.bg}40;">
       <div class="podium-rank">${i+1}</div>
       <div class="podium-medal">${medals[i]}</div>
-      <div class="podium-name" style="color:${t.color.bg}">${t.name}</div>
-      <div class="podium-score" style="color:${t.color.bg}">${t.score}</div>
-      <div class="podium-score-label">Total Points</div>
+      <div class="podium-name" style="color:${team.color.bg}">${team.name}</div>
+      <div class="podium-score" style="color:${team.color.bg}">${team.score}</div>
+      <div class="podium-score-label">${t('totalPoints')}</div>
     </div>`).join('');
 
-  const affectedKpis=[...new Set(G.scenarioQueue.flatMap(s=>s.affectedKpis))];
-  const colStyle=`grid-template-columns: 180px ${G.teams.map(()=>'1fr').join(' ')}`;
-
-  let tableHtml=`
-    <div class="kft-head" style="${colStyle}">
-      <div>KPI</div>
-      ${G.teams.map(t=>`<div style="color:${t.color.bg}">${t.name}</div>`).join('')}
-    </div>`;
-
-  affectedKpis.forEach(code=>{
-    const kdef=getKpi(code);if(!kdef)return;
+  const allKpis=[...new Set(G.scenarioQueue.flatMap(s=>s.affectedKpis))];
+  
+  // FIX: Also renamed 't' to 'team' here for consistency
+  const colStyle=`grid-template-columns:180px ${G.teams.map(()=>'1fr').join(' ')}`;
+  let tHtml=`<div class="kft-head" style="${colStyle}"><div>KPI</div>${G.teams.map(team=>`<div style="color:${team.color.bg}">${team.name}</div>`).join('')}</div>`;
+  
+  allKpis.forEach(code=>{
+    const kd=getKpi(code);if(!kd)return;
     const isFocus=code===G.focusKpi;
-    tableHtml+=`<div class="kft-row" style="${colStyle}${isFocus?';background:rgba(245,166,35,.04)':''}">
-      <div class="kft-kpi">${isFocus?'★ ':''}<span title="${kdef.name}">${code} — ${kdef.name.substring(0,22)}…</span></div>
-      ${G.teams.map(t=>{
-        const val=Math.round(t.kpiScores[code.replace('.', '_')] || kdef.baseline);
-        const delta=val-kdef.baseline;
-        const isGood = delta>0===kdef.dir>0;
-        const cls=isGood?'kft-val-good':'kft-val-bad';
-        return `<div class="${cls}">${val}${kdef.unit} <span style="font-size:.75em;opacity:.8;">${delta>=0?'(+'+delta+')':'('+delta+')'}</span></div>`;
+    tHtml+=`<div class="kft-row" style="${colStyle}${isFocus?';background:rgba(245,166,35,.04)':''}">
+      <div class="kft-kpi tooltip">${isFocus?'★ ':''}<span>${code}</span><span class="tt">${escapeHtml(kd.name)}</span></div>
+      ${G.teams.map(team=>{
+        const val=Math.round(team.kpiScores[code]??kd.baseline);
+        const delta=val-kd.baseline;
+        const good=delta>0===kd.dir>0;
+        return `<div class="${good?'kft-val-good':'kft-val-bad'}">${val}${kd.unit} <span style="font-size:.75em;opacity:.8;">(${delta>=0?'+':''}${delta})</span></div>`;
       }).join('')}
     </div>`;
   });
-  document.getElementById('kpiFinalTable').innerHTML=tableHtml;
-
-  // Render charts
-  renderScoreChart();
-  renderFocusKpiChart();
-}
-
-function renderScoreChart() {
-  const ctx = document.getElementById('scoreChart');
-  if (!ctx) return console.error('Score chart canvas not found');
-  const data = {
-    labels: Array.from({length: G.totalRounds}, (_, i) => `R${i+1}`),
-    datasets: G.teams.map((t, i) => ({
-      label: t.name,
-      data: G.scoreHistory[i] || Array(G.totalRounds).fill(0),
-      borderColor: getComputedStyle(document.body).getPropertyValue(t.color.bg),
-      fill: false,
-      tension: 0.1
-    }))
-  };
-  new Chart(ctx, {
-    type: 'line',
-    data: data,
-    options: {
-      responsive: true,
-      scales: { y: { beginAtZero: true } },
-      plugins: { tooltip: { mode: 'index', intersect: false } }
-    }
+  document.getElementById('kpiFinalTable').innerHTML=tHtml;
+  
+  // Wait for the browser to physically paint the layout before rendering charts
+  requestAnimationFrame(() => {
+    setTimeout(renderCharts, 150);
   });
 }
-
-function renderFocusKpiChart() {
-  if (!G.focusKpi) return;
-  const code = G.focusKpi.replace('.', '_');
-  const ctx = document.getElementById('focusKpiChart');
-  if (!ctx) return console.error('Focus KPI chart canvas not found');
-  const data = {
-    labels: Array.from({length: G.totalRounds}, (_, i) => `R${i+1}`),
-    datasets: G.teams.map((t, i) => ({
-      label: t.name,
-      data: (G.kpiHistory[code] && G.kpiHistory[code][i]) || Array(G.totalRounds).fill(getKpi(G.focusKpi).baseline),
-      borderColor: getComputedStyle(document.body).getPropertyValue(t.color.bg),
-      fill: false,
-      tension: 0.1
-    }))
-  };
-  new Chart(ctx, {
-    type: 'line',
-    data: data,
-    options: {
-      responsive: true,
-      scales: { y: { beginAtZero: true } },
-      plugins: { tooltip: { mode: 'index', intersect: false } }
+/* ══════════════════════════════════════════
+   CHARTS — Fixed: use hex colors directly,
+   not getComputedStyle which returns empty
+   for CSS variables
+══════════════════════════════════════════ */
+function renderCharts(){
+  if(scoreChartObj){scoreChartObj.destroy();scoreChartObj=null;}
+  if(focusKpiChartObj){focusKpiChartObj.destroy();focusKpiChartObj=null;}
+  const isDark=!document.body.classList.contains('light-mode');
+  const gridColor=isDark?'rgba(255,255,255,.06)':'rgba(0,0,0,.08)';
+  const labelColor=isDark?'#5a6a82':'#8898ab';
+  const labels = ['Start', ...Array.from({length:G.totalRounds},(_,i)=>`R${i+1}`)];
+  
+  const baseChartOpts={
+    responsive:true,
+    maintainAspectRatio: false, // FIX: Stops Chart.js from stretching out of boundaries
+    plugins:{legend:{labels:{color:labelColor,font:{size:11}}},tooltip:{mode:'index',intersect:false}},
+    scales:{
+      x:{grid:{color:gridColor},ticks:{color:labelColor}},
+      y:{grid:{color:gridColor},ticks:{color:labelColor},beginAtZero:false}
     }
-  });
-}
-
-function restartSameGame(){
-  showScreen('game');
-  G.teams.forEach(t=>{t.score=0;KPI_DATA.forEach(k=>{t.kpiScores[k.code.replace('.', '_')]=k.baseline;});});
-  G.currentRound=1;G.currentTeamIdx=0;G.teamDecisions=[];
-  G.scoreHistory = Array.from({length:G.teamCount}, () => []);
-  G.kpiHistory = {};
-  KPI_DATA.forEach(k => G.kpiHistory[k.code.replace('.', '_')] = Array.from({length:G.teamCount}, () => []));
-  let pool2=[...SCENARIOS].sort(()=>Math.random()-.5);
-  G.scenarioQueue=[];
-  for(let i=0;i<G.totalRounds;i++){
-    if(pool2.length===0) pool2=[...SCENARIOS].sort(()=>Math.random()-.5);
-    G.scenarioQueue.push(pool2.shift());
+  };
+  
+  // Score chart
+  const sCtx=document.getElementById('scoreChart');
+  if(sCtx){
+    const sCtx2 = sCtx.getContext ? sCtx.getContext('2d') : sCtx;
+    const scoreDatasets = G.teams.map((t,i)=>{
+      const raw = Array.isArray(G.scoreHistory[i]) ? [...G.scoreHistory[i]] : [];
+      while(raw.length < labels.length) raw.push(raw.length?raw[raw.length-1]:0);
+      return {
+        label: t.name,
+        data: raw,
+        borderColor: t.color.hex,
+        backgroundColor: t.color.hex+'22',
+        fill: false, tension: .3, pointRadius: 4
+      };
+    });
+    scoreChartObj=new Chart(sCtx2,{type:'line',data:{labels,datasets:scoreDatasets},options:{...baseChartOpts}});
   }
+  
+  // Focus KPI chart
+  const fCtx=document.getElementById('focusKpiChart');
+  if(fCtx&&G.focusKpi&&G.kpiHistory&&G.kpiHistory[G.focusKpi]){
+    const fCtx2 = fCtx.getContext ? fCtx.getContext('2d') : fCtx;
+    const kpiSets = G.teams.map((t,i)=>{
+      const raw = (G.kpiHistory[G.focusKpi] && Array.isArray(G.kpiHistory[G.focusKpi][i])) ? [...G.kpiHistory[G.focusKpi][i]] : [];
+      while(raw.length < labels.length) raw.push(raw.length?raw[raw.length-1]: (getKpi(G.focusKpi)?.baseline||0));
+      return {label:t.name,data:raw,borderColor:t.color.hex,backgroundColor:t.color.hex+'22',fill:false,tension:.3,pointRadius:4};
+    });
+    focusKpiChartObj=new Chart(fCtx2,{type:'line',data:{labels,datasets:kpiSets},options:{...baseChartOpts,plugins:{...baseChartOpts.plugins,title:{display:true,text:getKpi(G.focusKpi)?.name||G.focusKpi,color:labelColor,font:{size:11}}}}});
+  }
+}
+function restartSameGame(){
+  G.currentRound=1;G.currentTeamIdx=0;G.teamDecisions=[];
+  G.roundHistory=[];
+
+  // Initialize histories ONCE
+  G.scoreHistory = Array.from({length: G.teamCount}, () => [0]);
+  G.kpiHistory = {};
+  if (G.focusKpi) {
+    const kd = getKpi(G.focusKpi);
+    const baseline = kd ? kd.baseline : 0;
+    G.kpiHistory[G.focusKpi] = Array.from({length: G.teamCount}, () => [baseline]);
+  }
+
+  G.teams.forEach(t=>{t.score=0;KPI_DATA.forEach(k=>{t.kpiScores[k.code]=k.baseline;});});
+
+  // Smart Queue Logic
+  let priorityPool = SCENARIOS.filter(s => s.affectedKpis.includes(G.focusKpi)).sort(() => Math.random() - 0.5);
+  let standardPool = SCENARIOS.filter(s => !s.affectedKpis.includes(G.focusKpi)).sort(() => Math.random() - 0.5);
+  
+  G.scenarioQueue = [];
+  for (let i = 0; i < G.totalRounds; i++) {
+    if (priorityPool.length > 0) G.scenarioQueue.push(priorityPool.shift());
+    else if (standardPool.length > 0) G.scenarioQueue.push(standardPool.shift());
+    else {
+      priorityPool = SCENARIOS.filter(s => s.affectedKpis.includes(G.focusKpi)).sort(() => Math.random() - 0.5);
+      standardPool = SCENARIOS.filter(s => !s.affectedKpis.includes(G.focusKpi)).sort(() => Math.random() - 0.5);
+      G.scenarioQueue.push(priorityPool.length > 0 ? priorityPool.shift() : standardPool.shift());
+    }
+  }
+  G.scenarioQueue.sort(() => Math.random() - 0.5);
+
+  showScreen('game');
   buildRoundDots();renderScoreboard();loadRound();
-  updateHistory('Game restarted.');
-  Object.keys(G.kpiHistory).forEach(key => G.kpiHistory[key] = Array.from({length: G.teamCount}, () => []));
+  document.getElementById('historyEntries').innerHTML='';
+  addHistoryEntry('Game restarted.');
 }
 
 /* ══════════════════════════════════════════
-   EDITOR (Enhanced with dynamic decisions, preview)
+   EDITOR
 ══════════════════════════════════════════ */
 function edTab(name,btn){
   document.querySelectorAll('.ed-tab').forEach(t=>t.classList.remove('active'));
@@ -1378,169 +1443,195 @@ function edTab(name,btn){
   document.querySelectorAll('.ed-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('edPanel-'+name).classList.add('active');
 }
-
-function refreshEditor(){
-  renderEdScenarios();
-  renderKpiLibrary();
-}
+function refreshEditor(){renderEdScenarios();renderKpiLibrary();}
 
 function renderEdScenarios(){
   const list=document.getElementById('edScenarioList');
+  const builtIn=14; // first 14 are built-in
   list.innerHTML=SCENARIOS.map((s,i)=>`
     <div class="sl-item">
       <div class="sl-num">${String(i+1).padStart(2,'0')}</div>
       <div class="sl-info">
-        <div class="sl-title">${s.title}</div>
+        <div class="sl-title">${escapeHtml(s.title)}</div>
         <div class="sl-meta">
-          <span class="sl-kpi-tag">${s.cat}</span>
-          ${s.process?`<span class="sl-process-tag">${s.process}</span>`:''}
-          ${s.id.startsWith('s') && parseInt(s.id.substring(1)) >=8 ?'<span class="sl-nexaflow-tag">NexaFlow</span>':''}
+          <span class="sl-kpi-tag">${escapeHtml(s.cat)}</span>
+          ${s.process?`<span class="sl-process-tag">${escapeHtml(s.process)}</span>`:''}
+          ${i>=8&&i<builtIn?'<span class="sl-nexaflow-tag">NexaFlow</span>':''}
         </div>
-        <div class="sl-desc">${s.desc.substring(0,100)}…</div>
+        <div class="sl-desc">${escapeHtml(s.desc.substring(0,100))}…</div>
         <div class="sl-kpis">${s.affectedKpis.map(k=>`<span class="sl-kpi-tag">${k}</span>`).join('')}</div>
       </div>
-      <button class="sl-del" onclick="deleteScenario(${i})">✕</button>
+      ${i>=builtIn?`<button class="sl-del" onclick="deleteScenario(${i})">✕</button>`:'<span style="font-size:.58rem;color:var(--muted);flex-shrink:0;">built-in</span>'}
     </div>`).join('');
 }
 
-function addDecisionEditor() {
-  const container = document.getElementById('newScDecisions');
-  const letters = ['A', 'B', 'C', 'D'];
-  const index = container.children.length;
-  if (index >= 4) return toast('Max 4 decisions');
-  const editor = document.createElement('div');
-  editor.className = 'decision-editor';
-  editor.innerHTML = `<div class="de-header"><span class="de-letter">${letters[index]}</span><button class="sl-del" onclick="removeDecision(this)">✕</button></div>
-    <div class="ef-field"><label class="ef-label">Title</label><input class="ef-input dec-title" placeholder="Title"></div>
-    <div class="ef-field"><label class="ef-label">Description</label><textarea class="ef-textarea dec-desc" placeholder="Description..."></textarea></div>
-    <div class="ef-field"><label class="ef-label">KPI Impacts</label><input class="ef-input dec-impacts" placeholder="RL.1.1:+8,RS.1.1:-3"></div>
-    <div class="ef-field"><label class="ef-label">SCOR-DS Debrief</label><textarea class="ef-textarea dec-debrief" placeholder="Debrief text..."></textarea></div>`;
-  container.appendChild(editor);
-}
-
-function removeDecision(btn) {
-  btn.parentElement.parentElement.remove();
-}
-
-function previewScenario() {
-  const title = document.getElementById('newScTitle').value.trim();
-  // Gather all data similarly to saveScenario
-  // Then render a scenario card in preview-wrap
-  const preview = document.getElementById('scenarioPreview');
-  preview.style.display = 'block';
-  preview.innerHTML = `<div class="scenario-card"><div class="sc-header"><h2 class="sc-title">${title}</h2></div></div>`; // Simplified preview
+/* Dynamic decision editors */
+function addDecisionEditor(){
+  const container=document.getElementById('newScDecisions');
+  const letters=['A','B','C','D'];
+  const idx=container.children.length;
+  if(idx>=4){toast('Max 4 decisions');return;}
+  const el=document.createElement('div');
+  el.className='decision-editor';
+  el.innerHTML=`<div class="de-header"><span class="de-letter">${letters[idx]}</span><button class="sl-del" onclick="this.closest('.decision-editor').remove()">✕</button></div>
+    <div class="ef-field"><label class="ef-label">Title</label><input class="ef-input dec-title" placeholder="Decision title"></div>
+    <div class="ef-field"><label class="ef-label">Description</label><textarea class="ef-textarea dec-desc" placeholder="What does this decision entail?"></textarea></div>
+    <div class="ef-field"><label class="ef-label">KPI Impacts (e.g. RL.1.1:+8, CO.1.1:-5)</label><input class="ef-input dec-impacts" placeholder="RL.1.1:+8,CO.1.1:-5"></div>
+    <div class="ef-field"><label class="ef-label">SCOR-DS Debrief (shown after reveal)</label><textarea class="ef-textarea dec-debrief" placeholder="What SCOR-DS concept does this illustrate?"></textarea></div>`;
+  container.appendChild(el);
 }
 
 function saveScenario(){
-  // Similar to original, but save to localStorage after push
-  // ... (original code)
-  SCENARIOS.push({/* ... */});
-  saveData();
-  renderEdScenarios();
-  toast('Scenario added.');
+  const title=document.getElementById('newScTitle').value.trim();
+  const cat=document.getElementById('newScCat').value;
+  const process=document.getElementById('newScProcess').value;
+  const tags4PRaw=document.getElementById('newSc4P').value.trim();
+  const desc=document.getElementById('newScDesc').value.trim();
+  const insight=document.getElementById('newScInsight').value.trim();
+  const kpisRaw=document.getElementById('newScKpis').value.trim();
+  if(!title||!desc){toast('Title and description required');return;}
+  if(title.length>100){toast('Title max 100 chars');return;}
+  const affectedKpis=kpisRaw.split(',').map(k=>k.trim().toUpperCase()).filter(Boolean);
+  if(affectedKpis.length<1){toast('At least one KPI code required');return;}
+  for(const kpi of affectedKpis){
+    if(!getKpi(kpi)){toast(`Unknown KPI: ${kpi}`);return;}
+  }
+  const tags4P=tags4PRaw?tags4PRaw.split(',').map(t=>t.trim()).filter(Boolean):[];
+  const decEls=document.querySelectorAll('#newScDecisions .decision-editor');
+  const decisions=[];
+  const letters='ABCD';
+  for(let i=0;i<decEls.length;i++){
+    const el=decEls[i];
+    const ttl=el.querySelector('.dec-title').value.trim();
+    const dsc=el.querySelector('.dec-desc').value.trim();
+    const imp=el.querySelector('.dec-impacts').value.trim();
+    const deb=el.querySelector('.dec-debrief')?.value.trim()||'';
+    if(!ttl){toast(`Decision ${letters[i]} title required`);return;}
+    const impacts={};
+    if(imp){
+      for(const pair of imp.split(',')){
+        const parts=pair.trim().split(':');
+        if(parts.length!==2){toast(`Bad impact format: ${pair}`);return;}
+        const code=parts[0].trim().toUpperCase();
+        const val=parseInt(parts[1].trim());
+        if(!getKpi(code)){toast(`Unknown KPI: ${code}`);return;}
+        if(isNaN(val)){toast(`Bad delta: ${parts[1]}`);return;}
+        impacts[code.replace(/\./g,'_')]=val;
+      }
+    }
+    decisions.push({letter:letters[i],title:ttl,desc:dsc,impacts,debrief:deb});
+  }
+  if(decisions.length<2){toast('Add at least 2 decisions');return;}
+  SCENARIOS.push({id:'custom_'+Date.now(),title,cat,process,tags4P,desc,insight,affectedKpis,decisions});
+  saveData(); renderEdScenarios();
+  toast('Scenario added!');
+  ['newScTitle','newScDesc','newScInsight','newScKpis','newSc4P'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('newScDecisions').innerHTML='';
 }
 
-function deleteScenario(i){SCENARIOS.splice(i,1);saveData();renderEdScenarios();toast('Scenario removed.');}
+function deleteScenario(i){
+  if(i<14){toast('Cannot delete built-in scenarios');return;}
+  SCENARIOS.splice(i,1);saveData();renderEdScenarios();toast('Scenario removed.');
+}
 
+/* ══ KPI LIBRARY — Fully implemented ══ */
 function renderKpiLibrary(){
-  // Similar, with delete only for custom
-  // ... (enhanced to show if built-in or custom)
+  const el=document.getElementById('kpiLibraryTable');
+  const cats=[...new Set(KPI_DATA.map(k=>k.cat))];
+  el.innerHTML=cats.map(cat=>{
+    const kpis=KPI_DATA.filter(k=>k.cat===cat);
+    const ci=KPI_CATEGORIES[cat]||{label:cat,color:'var(--amber)'};
+    return `<div style="margin-bottom:1.25rem;">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:${ci.color};border-left:2px solid ${ci.color};padding-left:.6rem;margin-bottom:.5rem;">${ci.label}</div>
+      ${kpis.map(k=>`
+        <div style="display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;border-radius:8px;background:var(--card);border:1px solid var(--border);margin-bottom:.3rem;flex-wrap:wrap;">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:${ci.color};width:60px;flex-shrink:0;">${k.code}</span>
+          <span style="flex:1;font-size:.82rem;min-width:120px;">${escapeHtml(k.name)}</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);">baseline:${k.baseline}${k.unit} · ${k.min}–${k.max} · ${k.dir===1?'↑ good':'↓ good'}</span>
+          <button class="sl-del" onclick="removeKpi('${k.code}')" title="Remove">✕</button>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
 }
 
 function addCustomKpi(){
-  // ... (original)
-  saveData();
+  const code=document.getElementById('newKpiCode').value.trim().toUpperCase();
+  const name=document.getElementById('newKpiName').value.trim();
+  const cat=document.getElementById('newKpiCat').value;
+  const desc=document.getElementById('newKpiDesc').value.trim();
+  const unit=document.getElementById('newKpiUnit').value;
+  const dir=+document.getElementById('newKpiDir').value;
+  const baseline=parseInt(document.getElementById('newKpiBaseline').value);
+  const minVal=parseInt(document.getElementById('newKpiMin').value);
+  const maxVal=parseInt(document.getElementById('newKpiMax').value);
+  if(!code||!name){toast('Code and name required');return;}
+  if(!/^[A-Z]{2}\.\d\.\d$/.test(code)){toast('Code format: XX.1.1 (e.g. AG.2.3)');return;}
+  if(KPI_DATA.some(k=>k.code===code)){toast('Code already exists');return;}
+  if(isNaN(baseline)||isNaN(minVal)||isNaN(maxVal)){toast('Baseline, min, max must be numbers');return;}
+  if(minVal>=maxVal){toast('Min must be less than max');return;}
+  if(baseline<minVal||baseline>maxVal){toast('Baseline must be between min and max');return;}
+  KPI_DATA.push({code,name,cat,unit,dir,desc,baseline,min:minVal,max:maxVal});
+  saveData();renderKpiLibrary();buildKpiPicker();
+  ['newKpiCode','newKpiName','newKpiDesc','newKpiBaseline','newKpiMin','newKpiMax'].forEach(id=>document.getElementById(id).value='');
+  toast('KPI added!');
 }
 
 function removeKpi(code){
-  // ... (original)
-  saveData();
+  if(KPI_DATA.length<=3){toast('Minimum 3 KPIs required');return;}
+  const builtInCodes=['RL.1.1','RL.1.2','RL.1.3','RS.1.1','AG.1.1','CO.1.1','AM.1.1','AM.1.4'];
+  if(builtInCodes.includes(code)){toast('Cannot remove core SCOR-DS KPI');return;}
+  KPI_DATA=KPI_DATA.filter(k=>k.code!==code);
+  saveData();renderKpiLibrary();buildKpiPicker();toast('KPI removed.');
 }
 
-/* ══════════════════════════════════════════
-   IMPORT/EXPORT
-══════════════════════════════════════════ */
-function exportGameData() {
-  const gameData = {
-    focusKpi: G.focusKpi,
-    difficulty: G.difficulty,
-    teams: G.teams.map(t => ({ name: t.name, score: t.score, kpiScores: t.kpiScores, isAI: t.isAI })),
-    roundHistory: G.roundHistory,
-    scoreHistory: G.scoreHistory,
-    kpiHistory: G.kpiHistory,
-    scenariosUsed: G.scenarioQueue.map(s => s.id)
-  };
-  const fullData = { ...gameData, kpis: KPI_DATA, scenarios: SCENARIOS };
-  document.getElementById('exportText').value = JSON.stringify(fullData, null, 2);
-  document.getElementById('exportModal').style.display = 'block';
+/* ══ IMPORT / EXPORT ══ */
+function exportData(){
+  const data={kpis:KPI_DATA,scenarios:SCENARIOS};
+  document.getElementById('exportText').value=JSON.stringify(data,null,2);
+  document.getElementById('exportModal').style.display='block';
 }
-
-function exportData() {
-  const data = { kpis: KPI_DATA, scenarios: SCENARIOS };
-  document.getElementById('exportText').value = JSON.stringify(data, null, 2);
-  document.getElementById('exportModal').style.display = 'block';
+function exportGameData(){
+  const data={game:{focusKpi:G.focusKpi,difficulty:G.difficulty,totalRounds:G.totalRounds,
+    teams:G.teams.map(t=>({name:t.name,score:t.score,kpiScores:t.kpiScores})),
+    roundHistory:G.roundHistory,scoreHistory:G.scoreHistory},
+    kpis:KPI_DATA,scenarios:SCENARIOS};
+  document.getElementById('exportText').value=JSON.stringify(data,null,2);
+  document.getElementById('exportModal').style.display='block';
 }
-
-function copyExport() {
-  const text = document.getElementById('exportText');
-  text.select();
-  document.execCommand('copy');
-  toast('Copied to clipboard');
+function copyExport(){
+  const t=document.getElementById('exportText');t.select();
+  document.execCommand('copy');toast('Copied!');
 }
-function downloadExport() {
-  const text = document.getElementById('exportText').value;
-  const blob = new Blob([text], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'scor_command_game_data.json';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('Downloaded JSON file');
+function downloadExport(){
+  const text=document.getElementById('exportText').value;
+  const blob=new Blob([text],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='scor_command_data.json';a.click();
+  URL.revokeObjectURL(url);toast('Downloaded.');
 }
-
-function importData() {
-  const file = document.getElementById('importFile').files[0];
-  if (!file) return toast('Select a file');
-  const reader = new FileReader();
-  reader.onload = e => {
-    const data = JSON.parse(e.target.result);
-    KPI_DATA = data.kpis || KPI_DATA;
-    SCENARIOS = data.scenarios || SCENARIOS;
-    saveData();
-    refreshEditor();
-    toast('Data imported');
+function importData(){
+  const file=document.getElementById('importFile').files[0];
+  if(!file){toast('Select a JSON file first');return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!Array.isArray(data.kpis)||!Array.isArray(data.scenarios)) throw new Error('Missing kpis or scenarios arrays');
+      KPI_DATA=data.kpis;SCENARIOS=data.scenarios;
+      saveData();refreshEditor();buildKpiPicker();
+      toast(`Imported: ${KPI_DATA.length} KPIs, ${SCENARIOS.length} scenarios`);
+    }catch(err){toast('Import failed: '+err.message);}
   };
   reader.readAsText(file);
 }
+function closeModal(){document.getElementById('exportModal').style.display='none';}
 
-function closeModal() {
-  document.getElementById('exportModal').style.display = 'none';
-}
-
-/* ══════════════════════════════════════════
-   TOAST
-══════════════════════════════════════════ */
+/* ══ TOAST ══ */
 function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),3000);
-}
-
-function saveGameState() {
-  localStorage.setItem('scorGameState', JSON.stringify(G));
-  toast('Game saved');
-}
-function loadGameState() {
-  const saved = localStorage.getItem('scorGameState');
-  if (saved) {
-    Object.assign(G, JSON.parse(saved));
-    renderScoreboard();
-    loadRound();
-    toast('Game loaded');
-  } else {
-    toast('No saved game');
-  }
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3000);
 }
 
 /* ══════════════════════════════════════════
@@ -1549,9 +1640,10 @@ function loadGameState() {
 loadData();
 buildKpiPicker();
 selectKpi('RL.1.1');
-addDecisionEditor(); // Start with 3 decisions
-addDecisionEditor();
-addDecisionEditor();
+buildScorMap();
+refreshAllUI();
+// Seed editor decision editors
+addDecisionEditor();addDecisionEditor();addDecisionEditor();
 </script>
 </body>
 </html>
