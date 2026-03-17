@@ -23,8 +23,11 @@
   --amber2: #f5b84a;
   --teal:   #009a82;
   --blue:   #1a6bbf;
+  --blue2:  #4a9de8;
   --purple: #6552d4;
   --red:    #c93040;
+  --green:  #1a9e6e;
+  --green2: #3dd68c;
 
   --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
   --shadow-md: 0 4px 16px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.04);
@@ -84,11 +87,7 @@ body {
   box-shadow: var(--shadow-md);
 }
 
-/* Geometric logo mark — supply chain hexagon */
-.logo-mark {
-  width: 30px;
-  height: 30px;
-}
+.logo-mark { width: 30px; height: 30px; }
 
 .brand-text h1 {
   font-family: 'Syne', sans-serif;
@@ -137,30 +136,42 @@ body {
 }
 
 /* ══════════════════════════════════
-   HERO CARD — SCOR COMMAND
+   FEATURED GRID — TWO HERO CARDS
 ══════════════════════════════════ */
-.hero-section {
+.featured-section {
   margin-bottom: 1rem;
   animation: fadeUp .5s .1s ease both;
 }
 
+.featured-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .875rem;
+}
+
+/* ══════════════════════════════════
+   SHARED HERO CARD BASE
+══════════════════════════════════ */
 .hero-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
   text-decoration: none;
   background: var(--ink);
   border-radius: 20px;
-  padding: 2rem 2rem 1.75rem;
+  padding: 1.75rem 1.75rem 1.5rem;
   position: relative;
   overflow: hidden;
   transition: transform .25s ease, box-shadow .25s ease;
   box-shadow: var(--shadow-lg);
-}
-.hero-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 24px 60px rgba(0,0,0,.16), 0 6px 16px rgba(0,0,0,.08);
+  min-height: 360px;
 }
 
-/* Scanline texture */
+.hero-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 60px rgba(0,0,0,.18), 0 6px 16px rgba(0,0,0,.08);
+}
+
+/* Scanline texture — both cards */
 .hero-card::before {
   content: '';
   position: absolute;
@@ -169,167 +180,234 @@ body {
     0deg,
     transparent,
     transparent 2px,
-    rgba(255,255,255,.015) 2px,
-    rgba(255,255,255,.015) 4px
+    rgba(255,255,255,.012) 2px,
+    rgba(255,255,255,.012) 4px
   );
   pointer-events: none;
+  z-index: 0;
 }
 
-/* Amber glow */
-.hero-card::after {
+.hero-card > * { position: relative; z-index: 1; }
+
+/* ── SCOR Command — amber glow ── */
+.card-scor::after {
   content: '';
   position: absolute;
-  top: -60px;
-  right: -60px;
-  width: 240px;
-  height: 240px;
+  top: -60px; right: -60px;
+  width: 220px; height: 220px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(232,148,10,.18) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(232,148,10,.2) 0%, transparent 70%);
   pointer-events: none;
 }
 
+/* ── CTSC Bootcamp — blue/teal glow ── */
+.card-ctsc-hero::after {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(26,107,191,.22) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Subtle bottom-left glow for CTSC */
+.card-ctsc-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent, transparent 2px,
+      rgba(255,255,255,.012) 2px,
+      rgba(255,255,255,.012) 4px
+    ),
+    radial-gradient(ellipse at 0% 100%, rgba(26,158,110,.12) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ══════════════════════════════════
+   HERO CARD INTERNALS
+══════════════════════════════════ */
 .hero-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
-  gap: 1rem;
+  margin-bottom: 1.25rem;
+  gap: .5rem;
 }
 
+/* SCOR badge — amber */
 .hero-badge {
   display: inline-flex;
   align-items: center;
   gap: .4rem;
-  background: rgba(232,148,10,.15);
-  border: 1px solid rgba(232,148,10,.3);
   border-radius: 6px;
   padding: .25rem .6rem;
   font-family: 'DM Mono', monospace;
-  font-size: .6rem;
-  letter-spacing: .12em;
+  font-size: .58rem;
+  letter-spacing: .1em;
   text-transform: uppercase;
-  color: var(--amber2);
 }
 
-.hero-badge::before {
+.badge-amber {
+  background: rgba(232,148,10,.15);
+  border: 1px solid rgba(232,148,10,.3);
+  color: var(--amber2);
+}
+.badge-amber::before {
   content: '';
-  width: 6px;
-  height: 6px;
+  width: 6px; height: 6px;
   border-radius: 50%;
   background: var(--amber);
   animation: pulse 2s ease-in-out infinite;
 }
 
+/* CTSC badge — blue */
+.badge-blue {
+  background: rgba(26,107,191,.15);
+  border: 1px solid rgba(26,107,191,.35);
+  color: var(--blue2);
+}
+.badge-blue::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--blue2);
+  animation: pulse 2s .4s ease-in-out infinite;
+}
+
 .hero-version {
   font-family: 'DM Mono', monospace;
-  font-size: .6rem;
-  color: rgba(255,255,255,.25);
-  letter-spacing: .1em;
+  font-size: .58rem;
+  color: rgba(255,255,255,.22);
+  letter-spacing: .08em;
+  white-space: nowrap;
 }
 
 .hero-title {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: 2.25rem;
+  font-size: 1.95rem;
   letter-spacing: -.04em;
-  line-height: .95;
+  line-height: .93;
   color: #ffffff;
-  margin-bottom: .6rem;
+  margin-bottom: .55rem;
 }
 
-.hero-title span { color: var(--amber); }
+.hero-title .accent-amber { color: var(--amber); }
+.hero-title .accent-blue  { color: var(--blue2); }
 
 .hero-desc {
-  font-size: .9rem;
-  color: rgba(255,255,255,.55);
-  line-height: 1.65;
-  margin-bottom: 1.75rem;
-  max-width: 380px;
+  font-size: .82rem;
+  color: rgba(255,255,255,.5);
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+  flex: 1;
 }
 
-.hero-scor-map {
+/* pill rows */
+.hero-pills {
   display: flex;
-  gap: .3rem;
+  gap: .28rem;
   flex-wrap: wrap;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.25rem;
 }
 
-.scor-pill {
+.pill {
   font-family: 'DM Mono', monospace;
-  font-size: .55rem;
-  letter-spacing: .1em;
+  font-size: .5rem;
+  letter-spacing: .08em;
   text-transform: uppercase;
-  padding: .2rem .55rem;
+  padding: .18rem .48rem;
   border-radius: 4px;
+}
+
+.pill-teal {
   border: 1px solid rgba(0,154,130,.3);
   color: rgba(0,210,178,.75);
   background: rgba(0,154,130,.08);
 }
 
-.hero-stats {
-  display: flex;
-  gap: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255,255,255,.08);
+.pill-blue {
+  border: 1px solid rgba(74,157,232,.28);
+  color: rgba(74,157,232,.8);
+  background: rgba(26,107,191,.08);
 }
 
-.stat {
+/* stats row */
+.hero-stats {
   display: flex;
-  flex-direction: column;
-  gap: .15rem;
+  gap: 1rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(255,255,255,.07);
+  margin-top: auto;
 }
+
+.stat { display: flex; flex-direction: column; gap: .12rem; }
 
 .stat-num {
   font-family: 'Syne', sans-serif;
   font-weight: 700;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   color: #ffffff;
   letter-spacing: -.03em;
   line-height: 1;
 }
-
-.stat-num span { color: var(--amber); }
+.stat-num .accent-amber { color: var(--amber); }
+.stat-num .accent-blue  { color: var(--blue2); }
+.stat-num .accent-green { color: var(--green2); }
 
 .stat-label {
-  font-size: .7rem;
-  color: rgba(255,255,255,.3);
+  font-size: .62rem;
+  color: rgba(255,255,255,.28);
   font-family: 'DM Mono', monospace;
-  letter-spacing: .06em;
+  letter-spacing: .05em;
   text-transform: uppercase;
 }
 
+/* arrow CTA */
 .hero-cta {
   position: absolute;
-  bottom: 2rem;
-  right: 2rem;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: rgba(232,148,10,.15);
-  border: 1px solid rgba(232,148,10,.3);
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 36px; height: 36px;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background .2s, border-color .2s;
+  z-index: 2;
 }
 
-.hero-card:hover .hero-cta {
+.cta-amber {
+  background: rgba(232,148,10,.14);
+  border: 1px solid rgba(232,148,10,.28);
+}
+.card-scor:hover .cta-amber {
   background: var(--amber);
   border-color: var(--amber);
 }
 
-.hero-cta svg {
-  transition: transform .2s;
+.cta-blue {
+  background: rgba(26,107,191,.14);
+  border: 1px solid rgba(26,107,191,.32);
+}
+.card-ctsc-hero:hover .cta-blue {
+  background: var(--blue);
+  border-color: var(--blue);
 }
 
-.hero-card:hover .hero-cta svg {
-  transform: translate(2px, -2px);
-}
+.hero-cta svg { transition: transform .2s; }
+.hero-card:hover .hero-cta svg { transform: translate(2px, -2px); }
 
 /* ══════════════════════════════════
    TOOL GRID
 ══════════════════════════════════ */
 .tools-section {
+  margin-top: 2.5rem;
   animation: fadeUp .5s .2s ease both;
 }
 
@@ -361,8 +439,7 @@ body {
 }
 
 .tool-icon {
-  width: 44px;
-  height: 44px;
+  width: 44px; height: 44px;
   border-radius: 11px;
   display: flex;
   align-items: center;
@@ -372,10 +449,7 @@ body {
   background: var(--icon-bg);
 }
 
-.tool-body {
-  flex: 1;
-  min-width: 0;
-}
+.tool-body { flex: 1; min-width: 0; }
 
 .tool-name {
   font-family: 'Syne', sans-serif;
@@ -416,64 +490,12 @@ body {
   flex-shrink: 0;
   transition: color .2s, transform .2s;
 }
-
 .tool-card:hover .tool-arrow {
   color: var(--accent-color);
   transform: translateX(2px);
 }
 
-/* Individual card accents */
-.card-ctsc  { --accent-color: var(--blue);   --icon-bg: #eef4fb; }
-.card-flash { --accent-color: var(--teal);   --icon-bg: #e8f7f5; }
-.card-epi   { --accent-color: var(--purple); --icon-bg: #f0eefb; }
-
-/* ══════════════════════════════════
-   PLAYBOOK CALLOUT
-══════════════════════════════════ */
-.playbook-section {
-  margin-top: 1rem;
-  animation: fadeUp .5s .25s ease both;
-}
-
-.playbook-card {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  background: linear-gradient(135deg, #fdf8ef 0%, #fff 60%);
-  border: 1px solid rgba(232,148,10,.25);
-  border-radius: 14px;
-  padding: 1.25rem 1.5rem;
-  box-shadow: 0 2px 12px rgba(232,148,10,.08);
-}
-
-.playbook-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 11px;
-  background: rgba(232,148,10,.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 1.2rem;
-}
-
-.playbook-body { flex: 1; }
-
-.playbook-body strong {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: .95rem;
-  color: var(--ink);
-  display: block;
-  margin-bottom: .2rem;
-}
-
-.playbook-body p {
-  font-size: .83rem;
-  color: var(--ink-soft);
-  line-height: 1.5;
-}
+.card-epi    { --accent-color: var(--purple); --icon-bg: #f0eefb; }
 
 /* ══════════════════════════════════
    FOOTER
@@ -487,7 +509,7 @@ footer {
   align-items: center;
   flex-wrap: wrap;
   gap: .75rem;
-  animation: fadeUp .5s .35s ease both;
+  animation: fadeUp .5s .3s ease both;
 }
 
 .footer-brand {
@@ -497,23 +519,15 @@ footer {
   color: var(--ink);
 }
 
-.footer-copy {
-  font-size: .78rem;
-  color: var(--ink-faint);
-}
+.footer-copy { font-size: .78rem; color: var(--ink-faint); }
 
-.footer-links {
-  display: flex;
-  gap: 1rem;
-}
-
+.footer-links { display: flex; gap: 1rem; }
 .footer-links a {
   font-size: .78rem;
   color: var(--ink-soft);
   text-decoration: none;
   transition: color .15s;
 }
-
 .footer-links a:hover { color: var(--blue); }
 
 /* ══════════════════════════════════
@@ -526,16 +540,20 @@ footer {
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: .4; }
+  50%       { opacity: .35; }
 }
 
 /* ══════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════ */
-@media (max-width: 480px) {
-  .hero-title { font-size: 1.85rem; }
-  .hero-stats  { gap: 1rem; }
-  .stat-num    { font-size: 1.15rem; }
+@media (max-width: 520px) {
+  .featured-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-card { min-height: auto; }
+  .hero-title { font-size: 1.75rem; }
+  .hero-stats  { gap: .875rem; }
+  .stat-num    { font-size: 1.05rem; }
   .hero-cta    { display: none; }
   footer       { flex-direction: column; align-items: flex-start; }
 }
@@ -544,11 +562,10 @@ footer {
 <body>
 <div class="page">
 
-  <!-- HEADER -->
+  <!-- ── HEADER ── -->
   <header class="header">
     <div class="brand-row">
       <div class="logo-box">
-        <!-- Geometric supply chain mark -->
         <svg class="logo-mark" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
           <polygon points="15,2 26,8.5 26,21.5 15,28 4,21.5 4,8.5" stroke="#f5a623" stroke-width="1.5" fill="none"/>
           <circle cx="15" cy="15" r="3.5" fill="#f5a623"/>
@@ -571,98 +588,116 @@ footer {
     </p>
   </header>
 
-  <!-- HERO: SCOR COMMAND -->
-  <section class="hero-section">
+  <!-- ── FEATURED: TWO HERO CARDS ── -->
+  <section class="featured-section">
     <div class="section-label">Featured</div>
-    <a href="scor_command.html" class="hero-card">
-      <div class="hero-top">
-        <div class="hero-badge">New · v3</div>
-        <span class="hero-version">SCOR-DS Edition</span>
-      </div>
+    <div class="featured-grid">
 
-      <h2 class="hero-title">SCOR<br><span>Command</span></h2>
-      <p class="hero-desc">
-        A competitive KPI simulation grounded in the SCOR-DS framework.
-        Navigate supply chain trade-offs, diagnose systemic paradoxes,
-        and prove that global performance demands local sacrifice.
-      </p>
-
-      <div class="hero-scor-map">
-        <span class="scor-pill">Orchestrate</span>
-        <span class="scor-pill">Source</span>
-        <span class="scor-pill">Transform</span>
-        <span class="scor-pill">Order</span>
-        <span class="scor-pill">Fulfill</span>
-        <span class="scor-pill">Return</span>
-        <span class="scor-pill">Enable</span>
-      </div>
-
-      <div class="hero-stats">
-        <div class="stat">
-          <div class="stat-num">14<span>+</span></div>
-          <div class="stat-label">Scenarios</div>
+      <!-- SCOR Command -->
+      <a href="scor_command.html" class="hero-card card-scor">
+        <div class="hero-top">
+          <div class="hero-badge badge-amber">New · v3</div>
+          <span class="hero-version">SCOR-DS Edition</span>
         </div>
-        <div class="stat">
-          <div class="stat-num">19</div>
-          <div class="stat-label">KPIs</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">5</div>
-          <div class="stat-label">Attributes</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">EN<span>/</span>FR</div>
-          <div class="stat-label">Languages</div>
-        </div>
-      </div>
 
-      <div class="hero-cta">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M3 13L13 3M13 3H6M13 3V10" stroke="white" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-    </a>
-  </section>
+        <h2 class="hero-title">SCOR<br><span class="accent-amber">Command</span></h2>
+        <p class="hero-desc">
+          A competitive KPI simulation grounded in the SCOR-DS framework.
+          Navigate supply chain trade-offs and systemic paradoxes.
+        </p>
 
-  <!-- PLAYBOOK NOTE -->
-  <section class="playbook-section">
-    <div class="playbook-card">
-      <div class="playbook-icon">📘</div>
-      <div class="playbook-body">
-        <strong>App Playbook & Toolkit available</strong>
-        <p>Complete instructor guide, scenario authoring standards, AI validation
-           system instruction, and maintenance documentation — 6 parts, 60+ pages.</p>
-      </div>
+        <div class="hero-pills">
+          <span class="pill pill-teal">Orchestrate</span>
+          <span class="pill pill-teal">Source</span>
+          <span class="pill pill-teal">Transform</span>
+          <span class="pill pill-teal">Order</span>
+          <span class="pill pill-teal">Fulfill</span>
+          <span class="pill pill-teal">Return</span>
+          <span class="pill pill-teal">Enable</span>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat">
+            <div class="stat-num">14<span class="accent-amber">+</span></div>
+            <div class="stat-label">Scenarios</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">19</div>
+            <div class="stat-label">KPIs</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">EN<span class="accent-amber">/</span>FR</div>
+            <div class="stat-label">Languages</div>
+          </div>
+        </div>
+
+        <div class="hero-cta cta-amber">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <path d="M3 13L13 3M13 3H6M13 3V10" stroke="white" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+
+      <!-- CTSC Bootcamp -->
+      <a href="https://beforservice.github.io/ctsc-bootcamp/" class="hero-card card-ctsc-hero">
+        <div class="hero-top">
+          <div class="hero-badge badge-blue">Bootcamp · FR/EN</div>
+          <span class="hero-version">ASCM · 2025</span>
+        </div>
+
+        <h2 class="hero-title">CTSC<br><span class="accent-blue">Bootcamp</span></h2>
+        <p class="hero-desc">
+          The first CTSC certification bootcamp in French. 8 weeks, live online,
+          weekends only — built for Francophone Africa.
+        </p>
+
+        <div class="hero-pills">
+          <span class="pill pill-blue">Module 1</span>
+          <span class="pill pill-blue">Module 2</span>
+          <span class="pill pill-blue">Module 3</span>
+          <span class="pill pill-blue">Module 4</span>
+          <span class="pill pill-blue">Exam Prep</span>
+          <span class="pill pill-blue">Simulations</span>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat">
+            <div class="stat-num">8</div>
+            <div class="stat-label">Weeks</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">16</div>
+            <div class="stat-label">Sessions</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">292</div>
+            <div class="stat-label">FR/EN Terms</div>
+          </div>
+        </div>
+
+        <div class="hero-cta cta-blue">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <path d="M3 13L13 3M13 3H6M13 3V10" stroke="white" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+
     </div>
   </section>
 
-  <!-- OTHER TOOLS -->
-  <section class="tools-section" style="margin-top: 2.5rem;">
+  <!-- ── OTHER TOOLS ── -->
+  <section class="tools-section">
     <div class="section-label">All Tools</div>
     <div class="tools-grid">
 
-      <a href="https://beforservice.github.io/ctsc-bootcamp/" class="tool-card card-ctsc">
-        <div class="tool-icon">🚀</div>
-        <div class="tool-body">
-          <div class="tool-name">CTSC Bootcamp</div>
-          <div class="tool-desc">Curriculum resources and structured training roadmap for CTSC professional certification preparation.</div>
-          <div class="tool-meta">
-            <span class="tool-tag">Curriculum</span>
-            <span class="tool-tag">Certification</span>
-          </div>
-        </div>
-        <svg class="tool-arrow" width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M3.5 9h11M9.5 4l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </a>
-
-      <a href="https://beforservice.github.io/ctsc-flashcards/" class="tool-card card-flash">
+      <a href="https://beforservice.github.io/ctsc-flashcards/" class="tool-card" style="--accent-color:var(--teal);--icon-bg:#e8f7f5">
         <div class="tool-icon">🃏</div>
         <div class="tool-body">
           <div class="tool-name">CTSC Flashcards</div>
-          <div class="tool-desc">Interactive study tools for professional certification — spaced repetition, self-assessment, and concept reinforcement.</div>
+          <div class="tool-desc">292 bilingual FR/EN flashcards — filterable by module and exam priority, with spaced self-study mode.</div>
           <div class="tool-meta">
             <span class="tool-tag">Study</span>
+            <span class="tool-tag">Bilingual</span>
             <span class="tool-tag">Interactive</span>
           </div>
         </div>
@@ -689,7 +724,7 @@ footer {
     </div>
   </section>
 
-  <!-- FOOTER -->
+  <!-- ── FOOTER ── -->
   <footer>
     <div>
       <div class="footer-brand">BeForService</div>
